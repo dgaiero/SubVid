@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="logoHeaders">
+    <file>image_assets/logo_license_back_small.png</file>
+  </qresource>
+  <qresource prefix="placeholders">
+    <file>image_assets/background_image_placeholder.jpg</file>
+    <file>image_assets/export_preview_placeholder.jpg</file>
+  </qresource>
+  <qresource prefix="generalAssets">
+    <file>image_assets/error_small.png</file>
+    <file>image_assets/success_small.png</file>
+  </qresource>
+</RCC>
