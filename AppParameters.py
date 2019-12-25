@@ -14,8 +14,11 @@ class Settings():
       self.frameTextList = []
       self.text_color = [0,0,0]
       self.framerate = 30
+      self.videoInProgress = False
 
    def canPreview(self):
+      if self.videoInProgress:
+         return False
       if (self.source_time == '') or\
          (self.sound_track == '') or\
          (self.font == '') or\
