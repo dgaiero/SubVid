@@ -16,6 +16,7 @@ opencv-python = "*"
 numpy = "*"
 moviepy = "*"
 timecode = "*"
+qdarkstyle = "*"
 
 [requires]
 python_version = "3.7"
