@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>815</width>
-    <height>423</height>
+    <width>1000</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -101,8 +101,17 @@
         </item>
         <item row="1" column="2">
          <widget class="QPushButton" name="sound_track_button">
+          <property name="toolTip">
+           <string>Browse Soundtrack (Ctrl+T)</string>
+          </property>
+          <property name="statusTip">
+           <string>Browse for sound track file</string>
+          </property>
           <property name="text">
            <string>Browse</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+T</string>
           </property>
          </widget>
         </item>
@@ -128,8 +137,17 @@
         </item>
         <item row="0" column="2">
          <widget class="QPushButton" name="source_time_button">
+          <property name="toolTip">
+           <string>Browse Source Time File (Ctrl+E)</string>
+          </property>
+          <property name="statusTip">
+           <string>Browse for frame text and timecode file</string>
+          </property>
           <property name="text">
            <string>Browse</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+E</string>
           </property>
          </widget>
         </item>
@@ -141,6 +159,12 @@
          <layout class="QVBoxLayout" name="frame_preview">
           <item>
            <widget class="QGraphicsView" name="preview_graphic">
+            <property name="statusTip">
+             <string>Preview window for each frame</string>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(0, 0, 0);</string>
+            </property>
             <property name="verticalScrollBarPolicy">
              <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
@@ -166,22 +190,49 @@
             </item>
             <item>
              <widget class="QPushButton" name="frame_previous_button">
+              <property name="toolTip">
+               <string>Show previous frame (p)</string>
+              </property>
+              <property name="statusTip">
+               <string>Show previous frame</string>
+              </property>
               <property name="text">
                <string>Previous</string>
+              </property>
+              <property name="shortcut">
+               <string>P</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="refresh_button">
+              <property name="toolTip">
+               <string>Refresh Preview (Ctrl+R)</string>
+              </property>
+              <property name="statusTip">
+               <string>Refresh frame preview window</string>
+              </property>
               <property name="text">
                <string>↻ Refresh</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+R</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="frame_next_button">
+              <property name="toolTip">
+               <string>Show next frame (n)</string>
+              </property>
+              <property name="statusTip">
+               <string>Show next frame</string>
+              </property>
               <property name="text">
                <string>Next</string>
+              </property>
+              <property name="shortcut">
+               <string>N</string>
               </property>
              </widget>
             </item>
@@ -236,8 +287,17 @@
               </item>
               <item>
                <widget class="QPushButton" name="font_button">
+                <property name="toolTip">
+                 <string>Browse for font file (Ctrl+F)</string>
+                </property>
+                <property name="statusTip">
+                 <string>Browse for font file</string>
+                </property>
                 <property name="text">
                  <string>Browse</string>
+                </property>
+                <property name="shortcut">
+                 <string>Ctrl+F</string>
                 </property>
                </widget>
               </item>
@@ -276,6 +336,9 @@
                   <height>0</height>
                  </size>
                 </property>
+                <property name="statusTip">
+                 <string>Set font size</string>
+                </property>
                 <property name="minimum">
                  <number>1</number>
                 </property>
@@ -306,6 +369,9 @@
               </item>
               <item row="0" column="1">
                <widget class="QSpinBox" name="red_spin_box_2">
+                <property name="statusTip">
+                 <string>Set font red value</string>
+                </property>
                 <property name="maximum">
                  <number>255</number>
                 </property>
@@ -330,6 +396,9 @@
               </item>
               <item row="0" column="1">
                <widget class="QSpinBox" name="green_spin_box">
+                <property name="statusTip">
+                 <string>Set font green value</string>
+                </property>
                 <property name="maximum">
                  <number>255</number>
                 </property>
@@ -354,8 +423,35 @@
               </item>
               <item row="0" column="1">
                <widget class="QSpinBox" name="blue_spin_box">
+                <property name="statusTip">
+                 <string>Set font blue value</string>
+                </property>
                 <property name="maximum">
                  <number>255</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="fps_layout">
+              <item row="0" column="0">
+               <widget class="QLabel" name="fps_label">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>FPS</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="fps_options">
+                <property name="statusTip">
+                 <string>Set output video frame rate</string>
                 </property>
                </widget>
               </item>
@@ -380,6 +476,12 @@
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <item>
              <widget class="QGraphicsView" name="background_preview">
+              <property name="statusTip">
+               <string>Preview window showing the background frame</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: rgb(0, 0, 0);</string>
+              </property>
               <property name="inputMethodHints">
                <set>Qt::ImhNone</set>
               </property>
@@ -402,8 +504,17 @@
             </item>
             <item>
              <widget class="QPushButton" name="background_button">
+              <property name="toolTip">
+               <string>Browse for background frame (Ctrl+B)</string>
+              </property>
+              <property name="statusTip">
+               <string>Browse for background frame</string>
+              </property>
               <property name="text">
                <string>Select Background Frame</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+B</string>
               </property>
              </widget>
             </item>
@@ -417,8 +528,17 @@
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="0" column="2">
          <widget class="QPushButton" name="video_location_button">
+          <property name="toolTip">
+           <string>Browse for output file location (Ctrl+L)</string>
+          </property>
+          <property name="statusTip">
+           <string>Browse for output video location</string>
+          </property>
           <property name="text">
            <string>Browse</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+L</string>
           </property>
          </widget>
         </item>
@@ -453,8 +573,17 @@
         </item>
         <item row="0" column="3">
          <widget class="QPushButton" name="generate_video_button">
+          <property name="toolTip">
+           <string>Generate Video (Ctrl+Return)</string>
+          </property>
+          <property name="statusTip">
+           <string>Generate video</string>
+          </property>
           <property name="text">
            <string>Generate Video</string>
+          </property>
+          <property name="shortcut">
+           <string>Ctrl+Return</string>
           </property>
          </widget>
         </item>
@@ -469,9 +598,12 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>815</width>
+     <width>1000</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>true</bool>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -491,7 +623,7 @@
   </widget>
   <widget class="QStatusBar" name="statusbar">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="sizeGripEnabled">
     <bool>false</bool>
@@ -505,15 +637,24 @@
    <property name="text">
     <string>Open</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="actionSave">
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
  </widget>
