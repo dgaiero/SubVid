@@ -3,28 +3,49 @@ import os
 import sys
 import webbrowser
 
+import cv2
+import moviepy.editor as mpe
+import numpy
 import PyQt5.QtGui as QtGui
 import requests
+from PIL import Image
 from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import QThread
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene
 
 import layouts.license
 import layouts.main_dialog
 import layouts_helper
-from draw_background import draw_frame, convert_to_qt
 from AppParameters import Settings
-from Timecode import Timecode, MalFormedDataException
-import cv2
+from draw_background import convert_to_qt, draw_frame
+from Lyrics import MalFormedDataException, Lyrics
+from GenerateVideo import GenerateVideo
+import functools
 
 processes = set([])
 
+
+def _statusBarDecorator(message):
+   def statusBarDecorator(func):
+      @functools.wraps(func)
+      def statusBarMessage_wrapper(self, *args, **kwargs):
+         self.statusbar.showMessage(message)
+         func(self)
+         self.statusbar.clearMessage()
+      return statusBarMessage_wrapper
+   return statusBarDecorator
+
 class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
+
    def __init__(self, settings, parent=None):
       super(MainDialog, self).__init__(parent)
       layouts_helper.configure_default_params(self)
       self.settings: Settings = settings
       self.fileOpenDialogDirectory = os.path.expanduser('~')
       self.bindLicenseActions()
+      self.fps_options.addItems(["23.98", "24", "25", "29.97",
+         "30", "50", "59.94", "60"])
+      self.fps_options.setCurrentText("30")
       self.source_time_button.clicked.connect(self.getSourceTime)
       self.sound_track_button.clicked.connect(self.getSoundTrack)
       self.font_button.clicked.connect(self.getParamFont)
@@ -32,29 +53,24 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.red_spin_box_2.valueChanged.connect(self.changeRed)
       self.green_spin_box.valueChanged.connect(self.changeGreen)
       self.blue_spin_box.valueChanged.connect(self.changeBlue)
+      self.fps_options.currentTextChanged.connect(self.updateFPS)
       self.background_button.clicked.connect(self.getBackgroundImage)
-      self.generate_video_button.clicked.connect(self.generateVideo)
+      self.generate_video_button.clicked.connect(self._generateVideo)
       self.refresh_button.clicked.connect(self.refreshVideo)
       self.video_location_button.clicked.connect(self.getVideoOutputLocation)
       self.frame_next_button.clicked.connect(self.showNextFrame)
       self.frame_previous_button.clicked.connect(self.showPreviousFrame)
-      # self.frame_previous_button.setEnabled(False)
-      # self.frame_next_button.setEnabled(False)
-      # self.background_preview.showEvent()
 
-      self.source_time_button.setShortcut('Ctrl+E')
-      self.sound_track_button.setShortcut('Ctrl+T')
-      self.background_button.setShortcut('Ctrl+B')
-      self.generate_video_button.setShortcut('Ctrl+G')
-      self.video_location_button.setShortcut('Ctrl+L')
-      self.refresh_button.setShortcut('Ctrl+R')
-      self.frame_previous_button.setShortcut('p')
-      self.frame_next_button.setShortcut('n')
+      self.videoThread: QThread = GenerateVideo()
+      self.videoThread.update.connect(self.updateProgress)
+      self.videoThread.text.connect(self.updateVideoGenerationStatusText)
+      self.videoThread.image.connect(self.updatePreviewWindowVG)
+      self.videoThread.fail.connect(self.generationFailure)
+      self.videoThread.finished.connect(self.cleanupVideoGeneration)
 
       timer100ms = QtCore.QTimer(self)
       timer100ms.timeout.connect(self.runUpdateEvents100ms)
       timer100ms.start(100) # 100 ms refesh rate
-      
 
    def runUpdateEvents100ms(self):
       self.generate_video_button.setEnabled(self.settings.canGenerate())
@@ -77,6 +93,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.setPreviewPicture()
 
    def checkFramePosition(self):
+      if (self.settings.videoInProgress):
+         self.frame_previous_button.setEnabled(False)
+         self.frame_next_button.setEnabled(False)
       if (self.settings.canPreview() == False):
          self.frame_previous_button.setEnabled(False)
          self.frame_next_button.setEnabled(False)
@@ -85,17 +104,21 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.frame_previous_button.setEnabled(False)
       else:
          self.frame_previous_button.setEnabled(True)
-      if self.settings.frameNumber == len(self.settings.frameTextList):
+      if self.settings.frameNumber == len(self.settings.frameTextList) - 1:
          self.frame_next_button.setEnabled(False)
       else:
          self.frame_next_button.setEnabled(True)
 
    def showPreviousFrame(self):
       self.settings.frameNumber -= 1
+      self.statusbar.showMessage(
+          f"Showing frame {self.settings.frameNumber}", msecs=1000)
       self.setPreviewPicture()
 
    def showNextFrame(self):
       self.settings.frameNumber += 1
+      self.statusbar.showMessage(
+          f"Showing frame {self.settings.frameNumber}", msecs=1000)
       self.setPreviewPicture()
 
    def setPreviewPicture(self):
@@ -103,11 +126,60 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.settings.preview_frame = convert_to_qt(pilImg)
       self.resizePreview()
 
-   def generateVideo(self):
-      pilImg = draw_frame(self.settings, "TEST")
+   def _generateVideo(self):
+      self.generate_video_status_label = QtWidgets.QLabel()
+      self.statusbar.addPermanentWidget(
+          self.generate_video_status_label, 100)
+      self.toggleButtoms(False, True)
+
+      self.videoThread.settings = self.settings
+      self.videoThread.start()
+
+   def toggleButtoms(self, tstatus, vIP):
+      self.source_time_button.setEnabled(tstatus)
+      self.sound_track_button.setEnabled(tstatus)
+      self.font_button.setEnabled(tstatus)
+      self.font_size_tb.setEnabled(tstatus)
+      self.red_spin_box_2.setEnabled(tstatus)
+      self.green_spin_box.setEnabled(tstatus)
+      self.blue_spin_box.setEnabled(tstatus)
+      self.fps_options.setEnabled(tstatus)
+      self.background_button.setEnabled(tstatus)
+      self.video_location_button.setEnabled(tstatus)
+      self.settings.videoInProgress = vIP
+
+   def updateVideoGenerationStatusText(self, text):
+      self.generate_video_status_label.setText(text)
+
+   def updateProgress(self):
+      self.video_generation_progress.setValue(
+          self.video_generation_progress.value() + 1)
+
+   def updatePreviewWindowVG(self, pilImg):
       self.settings.preview_frame = convert_to_qt(pilImg)
       self.resizePreview()
 
+   def generationFailure(self):
+      self.statusbar.removeWidget(self.generate_video_status_label)
+      self.toggleButtoms(True, False)
+      self.video_generation_progress.setValue(0)
+      layouts_helper.show_dialog_non_informative_text(self, "Error",
+         f"Video Generation Failure",
+         "",
+         buttons=QtWidgets.QMessageBox.Ok,
+         icon=QtWidgets.QMessageBox.Critical)
+
+   def cleanupVideoGeneration(self):
+      self.statusbar.removeWidget(self.generate_video_status_label)
+      self.toggleButtoms(True, False)
+      self.video_generation_progress.setValue(0)
+      layouts_helper.show_dialog_non_informative_text(self, "Done",
+         f"Video file located at <code>{self.settings.output_location}</code>",
+         "",
+         buttons=QtWidgets.QMessageBox.Ok,
+         icon=QtWidgets.QMessageBox.NoIcon)
+
+   @_statusBarDecorator("Browse for Source Time Spreadsheet")
    def getSourceTime(self):
       filters = 'All Acceptable Formats (*.xlsx *.xls *.csv *.tsv);;\
          Excel Files (*.xlsx *.xls);;\
@@ -120,19 +192,27 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.settings.source_time = fname[0]
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.source_time)
          self.source_time_tb.setText(self.settings.source_time)
-         frameText = Timecode(self.settings.source_time)
+         self.readSourceTimeData()
+      # self.statusbar.clearMessage()
+
+   @_statusBarDecorator("Reading source time data")
+   def readSourceTimeData(self):
+         frameText = Lyrics(self.settings.source_time,
+            str(self.settings.framerate))
          frameText.importData()
          try:
             frameText.readData()
             self.settings.frameTextList = frameText.timecode_frames
+            self.video_generation_progress.setMaximum(len(self.settings.frameTextList) + 1)
          except ValueError as e:
             layouts_helper.show_dialog_non_informative_text(
-               self, "Error", "Value Error.", str(e), buttons=QtWidgets.QMessageBox.Ok, icon=QtWidgets.QMessageBox.Warning)
+                self, "Error", f"<b>Value Error:</b> {str(e)}", "", buttons=QtWidgets.QMessageBox.Ok)
          except MalFormedDataException as e:
             extended_text = f"{e.message}\nActual Headers: {', '.join(e.actual_headers)}"
             layouts_helper.show_dialog_detailed_text(
-                self, "Error", f"Error: {e.message}", "", extended_text)
+                self, "Error", f"Error: {e.message}", "Informative Text", extended_text)
 
+   @_statusBarDecorator("Browse for a font")
    def getParamFont(self):
       filters = 'All Acceptable Formats (*.ttf *.otf);;\
          All Files (*.*)'
@@ -160,8 +240,14 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    def changeBlue(self):
       self.settings.text_color[2] = self.blue_spin_box.value()
 
+   def updateFPS(self):
+      self.settings.framerate = float(self.fps_options.currentText())
+      if (self.settings.source_time != ''):
+         self.readSourceTimeData()
+
+   @_statusBarDecorator("Browse for soundtrack")
    def getSoundTrack(self):
-      filters = 'All Acceptable Formats (*.mp3 *.m4a *.wav *.aac);;\
+      filters = 'All Acceptable Formats (*.mp3 *.m4a *.wav  *.aac);;\
          All Files (*.*)'
       fname = QFileDialog.getOpenFileName(self, 'Select Soundtrack File', self.fileOpenDialogDirectory,
          filters)
@@ -170,6 +256,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.sound_track)
          self.sound_track_tb.setText(self.settings.sound_track)
    
+   @_statusBarDecorator("Browse for output video location")
    def getVideoOutputLocation(self):
       filters = 'MP4 File (*.mp4)'
       fname = QFileDialog.getSaveFileName(self, 'Save As', self.fileOpenDialogDirectory,
@@ -179,6 +266,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.sound_track)
          self.video_location_tb.setText(self.settings.output_location)
 
+   @_statusBarDecorator("Browse for background image")
    def getBackgroundImage(self):
       filters = 'Image files (*.jpg *.jpeg *.gif *.png)'
       fname = QFileDialog.getOpenFileName(self, 'Select Background File', self.fileOpenDialogDirectory,
@@ -210,6 +298,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       license_view_dialog = LicenseWindow()
       processes.add(license_view_dialog)
       self.actionAbout.triggered.connect(license_view_dialog.show)
+
 
 class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
    def __init__(self, parent=None):
