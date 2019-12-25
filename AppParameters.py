@@ -13,6 +13,7 @@ class Settings():
       self.frameNumber = 0
       self.frameTextList = []
       self.text_color = [0,0,0]
+      self.framerate = 30
 
    def canPreview(self):
       if (self.source_time == '') or\
