@@ -1,21 +1,26 @@
 from tablib import Dataset
 from binaryornot.check import is_binary
 import datetime
+from timecode import Timecode
 
 class Line():
-   def __init__(self, start, end, line):
-      self.start = datetime.datetime.strptime(start, '%H:%M:%S:%f').time()
-      self.end = datetime.datetime.strptime(end, '%H:%M:%S:%f').time()
-      self.start = datetime.datetime.combine(datetime.date(1, 1, 1), self.start)
-      self.end = datetime.datetime.combine(datetime.date(1, 1, 1), self.end)
-      self.delta = self.start - self.end
+   def __init__(self, start, end, line, fps):
+      self.start = Timecode(fps,start)
+      self.end = Timecode(fps, end)
+      self.delta: Timecode = self.end - self.start
+      self.num_frames = self.delta.frames
+      # print(self.delta)
+      # print(type(self.delta))
+      # print(self.delta.total_seconds())
+      # print(type(self.delta.total_seconds()))
       self.line = line
-      # print(f"{self.line} - {self.delta} ({self.start} - {self.end})")
+      print(f"{self.line:50s} - {self.delta} ({self.num_frames}) ({self.start} - {self.end})")
 
-class Timecode():
-   def __init__(self, source):
+class Lyrics():
+   def __init__(self, source, fps):
       self.source = source
       self.timecode_frames = []
+      self.fps = fps
    
    def importData(self):
       read_type = 'r'
@@ -31,8 +36,8 @@ class Timecode():
             name = self.tbData['Name'][i]
          except KeyError:
             raise MalFormedDataException(self.tbData.headers)
-         print(f"{start} - {end} - {name}")
-         tLine = Line(start,end,name)
+         # print(f"({start} - {end}) - {name}")
+         tLine = Line(start,end,name, self.fps)
          self.timecode_frames.append(tLine)
 
 
