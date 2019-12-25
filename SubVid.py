@@ -26,7 +26,7 @@ def main():
    main_window = layouts_wrapper.MainDialog(ApplicationSettings)
    main_window.show()
    # main_window.statusbar.showMessage('test',2000)
-   main_window.statusbar.setVisible(False)
+   # main_window.statusbar.setVisible(False)
    # print(QtWidgets.QApplication.instance().devicePixelRatio())
    sys.exit(app.exec_())
 
