@@ -14,7 +14,7 @@ class GenerateVideo(QThread):
 
    text: pyqtSignal = pyqtSignal(object)
    image: pyqtSignal = pyqtSignal(object)
-   fail: pyqtSignal = pyqtSignal()
+   success: pyqtSignal = pyqtSignal(object)
    update : pyqtSignal= pyqtSignal()
 
    def __init__(self):
@@ -57,7 +57,9 @@ class GenerateVideo(QThread):
       vclp = addAudioToVideo(tempFile.name, self.settings.sound_track,
          self.settings.output_location)
       if vclp != 0:
-         self.fail.emit()
+         self.success.emit(False)
+      else:
+         self.success.emit(True)
       self.update.emit()
       os.remove(tempFile.name)
 

@@ -65,7 +65,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.videoThread.update.connect(self.updateProgress)
       self.videoThread.text.connect(self.updateVideoGenerationStatusText)
       self.videoThread.image.connect(self.updatePreviewWindowVG)
-      self.videoThread.fail.connect(self.generationFailure)
+      self.videoThread.success.connect(self.generationSuccessCheck)
       self.videoThread.finished.connect(self.cleanupVideoGeneration)
 
       timer100ms = QtCore.QTimer(self)
@@ -159,25 +159,25 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.settings.preview_frame = convert_to_qt(pilImg)
       self.resizePreview()
 
-   def generationFailure(self):
-      self.statusbar.removeWidget(self.generate_video_status_label)
-      self.toggleButtoms(True, False)
-      self.video_generation_progress.setValue(0)
-      layouts_helper.show_dialog_non_informative_text(self, "Error",
-         f"Video Generation Failure",
-         "",
-         buttons=QtWidgets.QMessageBox.Ok,
-         icon=QtWidgets.QMessageBox.Critical)
+   def generationSuccessCheck(self, check):
+      if check == False:
+         layouts_helper.show_dialog_non_informative_text(self, "Error",
+            f"Video Generation Failure",
+            "",
+            buttons=QtWidgets.QMessageBox.Ok,
+            icon=QtWidgets.QMessageBox.Critical)
+      else:
+         QtWidgets.QApplication.beep()
+         layouts_helper.show_dialog_non_informative_text(self, "Done",
+            f"Video file located at <br /><code>{self.settings.output_location}</code>",
+            "",
+            buttons=QtWidgets.QMessageBox.Ok,
+            icon=QtWidgets.QMessageBox.NoIcon)
 
    def cleanupVideoGeneration(self):
       self.statusbar.removeWidget(self.generate_video_status_label)
       self.toggleButtoms(True, False)
       self.video_generation_progress.setValue(0)
-      layouts_helper.show_dialog_non_informative_text(self, "Done",
-         f"Video file located at <code>{self.settings.output_location}</code>",
-         "",
-         buttons=QtWidgets.QMessageBox.Ok,
-         icon=QtWidgets.QMessageBox.NoIcon)
 
    @_statusBarDecorator("Browse for Source Time Spreadsheet")
    def getSourceTime(self):
