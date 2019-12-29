@@ -1,5 +1,8 @@
 import datetime
+import functools
+import json
 import os
+import pickle
 import sys
 import webbrowser
 
@@ -11,16 +14,17 @@ import requests
 from PIL import Image
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QThread
+from PyQt5.QtGui import QFont, QFontDatabase
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene
 
+import layouts.image_viewer
 import layouts.license
 import layouts.main_dialog
 import layouts_helper
 from AppParameters import Settings
 from draw_background import convert_to_qt, draw_frame
-from Lyrics import MalFormedDataException, Lyrics
 from GenerateVideo import GenerateVideo
-import functools
+from Lyrics import Lyrics, MalFormedDataException
 
 processes = set([])
 
@@ -37,15 +41,14 @@ def _statusBarDecorator(message):
 
 class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
-   def __init__(self, settings, parent=None):
+   previewClicked = QtCore.pyqtSignal(QtCore.QPoint)
+
+   def __init__(self, parent=None):
       super(MainDialog, self).__init__(parent)
       layouts_helper.configure_default_params(self)
-      self.settings: Settings = settings
+      self.settings: Settings = Settings()
       self.fileOpenDialogDirectory = os.path.expanduser('~')
       self.bindLicenseActions()
-      self.fps_options.addItems(["23.98", "24", "25", "29.97",
-         "30", "50", "59.94", "60"])
-      self.fps_options.setCurrentText("30")
       self.source_time_button.clicked.connect(self.getSourceTime)
       self.sound_track_button.clicked.connect(self.getSoundTrack)
       self.font_button.clicked.connect(self.getParamFont)
@@ -53,13 +56,16 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.red_spin_box_2.valueChanged.connect(self.changeRed)
       self.green_spin_box.valueChanged.connect(self.changeGreen)
       self.blue_spin_box.valueChanged.connect(self.changeBlue)
-      self.fps_options.currentTextChanged.connect(self.updateFPS)
       self.background_button.clicked.connect(self.getBackgroundImage)
       self.generate_video_button.clicked.connect(self._generateVideo)
       self.refresh_button.clicked.connect(self.refreshVideo)
       self.video_location_button.clicked.connect(self.getVideoOutputLocation)
       self.frame_next_button.clicked.connect(self.showNextFrame)
       self.frame_previous_button.clicked.connect(self.showPreviousFrame)
+      self.source_time_tb.textChanged.connect(self.updateSourceTimeTextBox)
+      self.sound_track_tb.textChanged.connect(self.updateSoundTrackTextBox)
+      self.font_tb.textChanged.connect(self.updateFontTextBox)
+      self.video_location_tb.textChanged.connect(self.updateVideoLocationTextBox)
 
       self.videoThread: QThread = GenerateVideo()
       self.videoThread.update.connect(self.updateProgress)
@@ -68,9 +74,56 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.videoThread.success.connect(self.generationSuccessCheck)
       self.videoThread.finished.connect(self.cleanupVideoGeneration)
 
+      self.actionOpen.triggered.connect(self.openPickle)
+      self.actionSave.triggered.connect(self.savePickle)
+
+      self.updateColors()
+
+      # self.preview_dialog = ImageViewer()
+      # processes.add(self.preview_dialog)
+      # self.actionAbout.triggered.connect(self.bindLargePreviewActions)
+      # self.previewClicked.connect(self.bindLargePreviewActions)
+
       timer100ms = QtCore.QTimer(self)
       timer100ms.timeout.connect(self.runUpdateEvents100ms)
       timer100ms.start(100) # 100 ms refesh rate
+
+   @_statusBarDecorator("Open Configuration File")
+   def openPickle(self):
+      filters = 'SubVid Configuration File (*.svp);;\
+         All Files (*.*)'
+      fname = QFileDialog.getOpenFileName(self, 'Select SubVid Pickle File',
+         self.fileOpenDialogDirectory, filters)
+      if fname[0] == '':
+         return
+      with open(fname[0], 'rb') as handle:
+         settings = pickle.load(handle)
+      # print(**settings)
+      self.settings.loadFromPickle(**settings)
+      self.updateTextBoxFromSettings()
+      if self.settings.background_frame != '':
+         self.resizeBackgroundImage()
+      if self.settings.source_time != '':
+         self.readSourceTimeData()
+      self.font_size_tb.setValue(self.settings.font_size)
+      self.red_spin_box_2.setValue(self.settings.text_color[0])
+      self.green_spin_box.setValue(self.settings.text_color[1])
+      self.blue_spin_box.setValue(self.settings.text_color[2])
+      self.color_preview.setStyleSheet(
+          f"background-color: rgb({self.settings.text_color[0]}, \
+            {self.settings.text_color[1]}, \
+            {self.settings.text_color[2]});")
+      
+   @_statusBarDecorator("Save Configuration File")
+   def savePickle(self):
+      filters = 'SubVid Configuration File (*.svp)'
+      fname = QFileDialog.getSaveFileName(self, 'Save As',
+         self.fileOpenDialogDirectory, filters)
+      if fname[0] == '':
+         return
+      with open(fname[0], 'wb') as handle:
+         pickle.dump(self.settings.pickleData(), handle,
+                     protocol=pickle.HIGHEST_PROTOCOL)
 
    def runUpdateEvents100ms(self):
       self.generate_video_button.setEnabled(self.settings.canGenerate())
@@ -89,8 +142,33 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.resizePreview()
       QtWidgets.QMainWindow.showEvent(self, event)
 
+   # def mousePressEvent(self, event):
+   #    if self.preview_graphic.underMouse():
+   #       self.previewClicked.emit(QtCore.QPoint(event.pos()))
+   #    QtWidgets.QMainWindow.mousePressEvent(self, event)
+
    def refreshVideo(self):
       self.setPreviewPicture()
+
+   def updateSourceTimeTextBox(self):
+      self.settings.source_time = self.source_time_tb.text()
+      if os.path.exists(self.settings.source_time):
+         self.readSourceTimeData()
+
+   def updateSoundTrackTextBox(self):
+      self.settings.sound_track = self.sound_track_tb.text()
+
+   def updateFontTextBox(self):
+      self.settings.font = self.font_tb.text()
+
+   def updateVideoLocationTextBox(self):
+      self.settings.output_location = self.video_location_tb.text()
+
+   def updateTextBoxFromSettings(self):
+      self.source_time_tb.setText(self.settings.source_time)
+      self.sound_track_tb.setText(self.settings.sound_track)
+      self.font_tb.setText(self.settings.font)
+      self.video_location_tb.setText(self.settings.output_location)
 
    def checkFramePosition(self):
       if (self.settings.videoInProgress):
@@ -131,6 +209,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.statusbar.addPermanentWidget(
           self.generate_video_status_label, 100)
       self.toggleButtoms(False, True)
+      self.toggleTextBoxes(False)
 
       self.videoThread.settings = self.settings
       self.videoThread.start()
@@ -143,10 +222,15 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.red_spin_box_2.setEnabled(tstatus)
       self.green_spin_box.setEnabled(tstatus)
       self.blue_spin_box.setEnabled(tstatus)
-      self.fps_options.setEnabled(tstatus)
       self.background_button.setEnabled(tstatus)
       self.video_location_button.setEnabled(tstatus)
       self.settings.videoInProgress = vIP
+
+   def toggleTextBoxes(self, tstatus):
+      self.source_time_tb.setEnabled(tstatus)
+      self.sound_track_tb.setEnabled(tstatus)
+      self.font_tb.setEnabled(tstatus)
+      self.video_location_tb.setEnabled(tstatus)
 
    def updateVideoGenerationStatusText(self, text):
       self.generate_video_status_label.setText(text)
@@ -177,6 +261,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    def cleanupVideoGeneration(self):
       self.statusbar.removeWidget(self.generate_video_status_label)
       self.toggleButtoms(True, False)
+      self.toggleTextBoxes(True)
       self.video_generation_progress.setValue(0)
 
    @_statusBarDecorator("Browse for Source Time Spreadsheet")
@@ -193,6 +278,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.source_time)
          self.source_time_tb.setText(self.settings.source_time)
          self.readSourceTimeData()
+      # print(json.dumps(self.settings.__dict__()))
       # self.statusbar.clearMessage()
 
    @_statusBarDecorator("Reading source time data")
@@ -233,21 +319,25 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    def changeRed(self):
       self.settings.text_color[0] = self.red_spin_box_2.value()
+      self.updateColors()
 
    def changeGreen(self):
       self.settings.text_color[1] = self.green_spin_box.value()
+      self.updateColors()
 
    def changeBlue(self):
       self.settings.text_color[2] = self.blue_spin_box.value()
+      self.updateColors()
 
-   def updateFPS(self):
-      self.settings.framerate = float(self.fps_options.currentText())
-      if (self.settings.source_time != ''):
-         self.readSourceTimeData()
+   def updateColors(self):
+      self.color_preview.setStyleSheet(
+          f"background-color: rgb({self.settings.text_color[0]}, \
+            {self.settings.text_color[1]}, \
+            {self.settings.text_color[2]});")
 
    @_statusBarDecorator("Browse for soundtrack")
    def getSoundTrack(self):
-      filters = 'All Acceptable Formats (*.mp3 *.m4a *.wav  *.aac);;\
+      filters = 'All Acceptable Formats (*.mp3 *.m4a *.wav  *.aac *.aif *.aiff);;\
          All Files (*.*)'
       fname = QFileDialog.getOpenFileName(self, 'Select Soundtrack File', self.fileOpenDialogDirectory,
          filters)
@@ -299,21 +389,48 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       processes.add(license_view_dialog)
       self.actionAbout.triggered.connect(license_view_dialog.show)
 
-
 class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
    def __init__(self, parent=None):
       super(LicenseWindow, self).__init__(parent)
       layouts_helper.configure_default_params(self)
       self.setWindowFlags(QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
       self.viewLicenseOnlineButton.clicked.connect(self.viewLicense)
-      self.license_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/LICENSE'
+      self.viewAddendumOnlineButton.clicked.connect(self.viewAddendum)
+      self.license_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/LICENSE.LGPL'
+      self.addendum_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/COPYING.LESSER'
       license_text = requests.get(self.license_url)
+      addendum_text = requests.get(self.addendum_url)
       self.licenseText.setPlainText(license_text.text)
+      self.addendumText.setPlainText(addendum_text.text)
+      # self.licenseText.setFont()
+      id = QFontDatabase.addApplicationFont(":/fonts/FiraCode-Regular.ttf")
+      _fontstr = QFontDatabase.applicationFontFamilies(id)[0]
+      _font = QFont(_fontstr, 8)
+      self.licenseText.setFont(_font)
+      self.addendumText.setFont(_font)
 
    def viewLicense(self):
       title = "View License"
-      message = f"You are about to open the license in your default webrowser.  Do you want to continue?"
+      message = f"You are about to open the license in your default webrowser. Do you want to continue?"
       choice = QtWidgets.QMessageBox.question(self, title,
          message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
       if choice == QtWidgets.QMessageBox.Yes:
          webbrowser.open_new_tab(self.license_url)
+
+   def viewAddendum(self):
+      title = "View Addendum"
+      message = f"You are about to open the addendum in your default webrowser. Do you want to continue?"
+      choice = QtWidgets.QMessageBox.question(self, title,
+                                              message, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+      if choice == QtWidgets.QMessageBox.Yes:
+         webbrowser.open_new_tab(self.addendum_url)
+
+class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
+   def __init__(self, parent=None):
+      super(ImageViewer, self).__init__(parent)
+      layouts_helper.configure_default_params(self)
+
+   # def mousePressEvent(self, event):
+   #    print("clicked")
+   #    self.hide()
+   #    QtWidgets.QMainWindow.mousePressEvent(self, event)
