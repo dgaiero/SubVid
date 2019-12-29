@@ -7,11 +7,9 @@ import sys
 import webbrowser
 
 import cv2
-import moviepy.editor as mpe
 import numpy
 import PyQt5.QtGui as QtGui
 import requests
-from PIL import Image
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QFont, QFontDatabase
@@ -96,6 +94,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.fileOpenDialogDirectory, filters)
       if fname[0] == '':
          return
+      self.readPickleFile(fname)
+      
+   def readPickleFile(self, fname):
       with open(fname[0], 'rb') as handle:
          settings = pickle.load(handle)
       # print(**settings)
