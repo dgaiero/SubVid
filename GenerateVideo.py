@@ -1,7 +1,5 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 import cv2
-import moviepy.editor as mpe
-from moviepy.editor import ColorClip
 import numpy
 from AppParameters import Settings
 from draw_background import convert_to_qt, draw_frame
