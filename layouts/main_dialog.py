@@ -22,7 +22,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setMinimumSize(QtCore.QSize(578, 357))
-        MainWindow.setMaximumSize(QtCore.QSize(1000, 500))
+        MainWindow.setMaximumSize(QtCore.QSize(35000, 35000))
         font = QtGui.QFont()
         font.setBold(False)
         font.setItalic(False)
