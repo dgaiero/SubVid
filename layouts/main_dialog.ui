@@ -121,7 +121,7 @@
         <item row="0" column="1">
          <widget class="QLineEdit" name="source_time_tb">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="inputMethodHints">
            <set>Qt::ImhNone</set>
@@ -134,7 +134,7 @@
         <item row="1" column="1">
          <widget class="QLineEdit" name="sound_track_tb">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -172,7 +172,7 @@
              <enum>Qt::ScrollBarAlwaysOff</enum>
             </property>
             <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
+             <enum>Qt::ScrollBarAsNeeded</enum>
             </property>
            </widget>
           </item>
@@ -194,7 +194,7 @@
             <item>
              <widget class="QPushButton" name="frame_previous_button">
               <property name="toolTip">
-               <string>Show previous frame (p)</string>
+               <string>Show previous frame (Ctrl+p)</string>
               </property>
               <property name="statusTip">
                <string>Show previous frame</string>
@@ -203,7 +203,7 @@
                <string>Previous</string>
               </property>
               <property name="shortcut">
-               <string>P</string>
+               <string>Ctrl+P</string>
               </property>
              </widget>
             </item>
@@ -226,7 +226,7 @@
             <item>
              <widget class="QPushButton" name="frame_next_button">
               <property name="toolTip">
-               <string>Show next frame (n)</string>
+               <string>Show next frame (Ctrl+N)</string>
               </property>
               <property name="statusTip">
                <string>Show next frame</string>
@@ -235,7 +235,7 @@
                <string>Next</string>
               </property>
               <property name="shortcut">
-               <string>N</string>
+               <string>Ctrl+N</string>
               </property>
              </widget>
             </item>
@@ -284,7 +284,7 @@
               <item>
                <widget class="QLineEdit" name="font_tb">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -437,28 +437,38 @@
              </layout>
             </item>
             <item>
-             <layout class="QFormLayout" name="fps_layout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="fps_label">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>FPS</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QComboBox" name="fps_options">
-                <property name="statusTip">
-                 <string>Set output video frame rate</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QGraphicsView" name="color_preview">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>19</width>
+                <height>19</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>19</width>
+                <height>19</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>19</width>
+                <height>19</height>
+               </size>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Plain</enum>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="horizontalSpacer_3">
@@ -570,7 +580,7 @@
         <item row="0" column="1">
          <widget class="QLineEdit" name="video_location_tb">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -673,7 +683,39 @@
     <string>Ctrl+A</string>
    </property>
   </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <tabstops>
+  <tabstop>source_time_tb</tabstop>
+  <tabstop>source_time_button</tabstop>
+  <tabstop>sound_track_tb</tabstop>
+  <tabstop>sound_track_button</tabstop>
+  <tabstop>preview_graphic</tabstop>
+  <tabstop>font_tb</tabstop>
+  <tabstop>font_button</tabstop>
+  <tabstop>font_size_tb</tabstop>
+  <tabstop>red_spin_box_2</tabstop>
+  <tabstop>green_spin_box</tabstop>
+  <tabstop>blue_spin_box</tabstop>
+  <tabstop>color_preview</tabstop>
+  <tabstop>background_preview</tabstop>
+  <tabstop>frame_previous_button</tabstop>
+  <tabstop>refresh_button</tabstop>
+  <tabstop>frame_next_button</tabstop>
+  <tabstop>background_button</tabstop>
+  <tabstop>video_location_tb</tabstop>
+  <tabstop>video_location_button</tabstop>
+  <tabstop>generate_video_button</tabstop>
+ </tabstops>
+ <resources>
+  <include location="main_images.qrc"/>
+ </resources>
  <connections/>
 </ui>
