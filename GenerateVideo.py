@@ -27,28 +27,19 @@ class GenerateVideo(QThread):
    def generateVideo(self):
       tempFile = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
       tempFile.close()
-      print(tempFile.name)
       pilImg: Image = draw_frame(
           self.settings, self.settings.frameTextList[0].line)
       width, height = pilImg.size
-      print(f"({width}, {height})")
-      # Create the OpenCV VideoWriter
       video: cv2.VideoWriter = cv2.VideoWriter(tempFile.name,
                                                -1,
          self.settings.framerate,
          (width, height)
          )
       for i in range(len(self.settings.frameTextList)):
-         # print(self.settings.frameTextList[i].line)
-         # self.emit(pyqtSignal('add_post(QString)'),
-         #           self.settings.frameTextList[i].line)
-         self.text.emit(f"Processing: {self.settings.frameTextList[i].line}")
+         self.text.emit(f"Processing: {'/'.join(self.settings.frameTextList[i].line)}")
          pilImg: Image = draw_frame(
              self.settings, self.settings.frameTextList[i].line)
          self.image.emit(pilImg)
-         # frame_length: int = self.settings.framerate*self.settings.frameTextList[i].delta.total_seconds()
-         # print(self.settings.frameTextList[i].delta)
-         # print(frame_length)
          for i in range(self.settings.frameTextList[i].num_frames):
             video.write(cv2.cvtColor(numpy.array(pilImg), cv2.COLOR_RGB2BGR))
          self.update.emit()
