@@ -13,8 +13,8 @@ class Line():
       # print(type(self.delta))
       # print(self.delta.total_seconds())
       # print(type(self.delta.total_seconds()))
-      self.line = line
-      print(f"{self.line:50s} - {self.delta} ({self.num_frames}) ({self.start} - {self.end})")
+      self.line = line.split("\\n")
+      # print(f"{'; '.join(self.line):50s} - {self.delta} ({self.num_frames}) ({self.start} - {self.end})")
 
 class Lyrics():
    def __init__(self, source, fps):
@@ -34,6 +34,8 @@ class Lyrics():
             start = self.tbData['Start'][i]
             end = self.tbData['End'][i]
             name = self.tbData['Name'][i]
+            if name == None:
+               name = ''
          except KeyError:
             raise MalFormedDataException(self.tbData.headers)
          # print(f"({start} - {end}) - {name}")
