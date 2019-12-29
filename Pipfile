@@ -17,6 +17,7 @@ numpy = "*"
 moviepy = "*"
 timecode = "*"
 qdarkstyle = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.7"
