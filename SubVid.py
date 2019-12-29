@@ -3,6 +3,8 @@ import os
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtCore import pyqtSlot
 import error_handler
 
@@ -35,14 +37,26 @@ class SubVid (QtWidgets.QApplication):  # Subclass QApplication
       # sys.argv[1] contains the second command line argument, aka "%1"
       filepath = sys.argv[1]
       # filepath is passed in as a string
-      self._window.generateFilepathList([filepath])
+      self._window.readPickleFile([filepath])
     except:
       pass
+
+
+def resource_path(relative_path):
+   if hasattr(sys, '_MEIPASS'):
+      return os.path.join(sys._MEIPASS, relative_path)
+   return os.path.join(os.path.abspath('.'), relative_path)
 
 def main():
    setup_parameters()
    app = SubVid(sys.argv)
+   splash_pix = QPixmap(':logoHeaders/image_assets/logo_license_back_small.png')
+   splash = QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+   splash.setMask(splash_pix.mask())
+   splash.show()
+   app.processEvents()
    app.setWindowIcon(QtGui.QIcon(':generalAssets/image_assets/logo.png'))
+   splash.finish(app._window)
    sys.exit(app.exec_())
 
 def setup_parameters():
