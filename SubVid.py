@@ -50,13 +50,8 @@ def resource_path(relative_path):
 def main():
    setup_parameters()
    app = SubVid(sys.argv)
-   splash_pix = QPixmap(':logoHeaders/image_assets/logo_license_back_small.png')
-   splash = QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
-   splash.setMask(splash_pix.mask())
-   splash.show()
    app.processEvents()
    app.setWindowIcon(QtGui.QIcon(':generalAssets/image_assets/logo.png'))
-   splash.finish(app._window)
    sys.exit(app.exec_())
 
 def setup_parameters():
