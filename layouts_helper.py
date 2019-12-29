@@ -1,13 +1,13 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import layouts_wrapper
-import qdarkstyle
+# import qdarkstyle
 
 
 def configure_default_params(self):
    self.setupUi(self)
-   # self.setStyle(QtWidgets.QApplication.setStyle("Fusion"))
-   self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+   self.setStyle(QtWidgets.QApplication.setStyle("Fusion"))
+   # self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 
 
 def show_dialog_detailed_text(parent, window_title, message, informative_text, extended_text, buttons=QtWidgets.QMessageBox.Ok |
