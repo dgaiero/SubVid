@@ -7,6 +7,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QSplashScreen
 from PyQt5.QtCore import pyqtSlot
 import error_handler
+from uuid import uuid4
 
 # import configuration_wizard
 import layouts_wrapper
@@ -27,8 +28,11 @@ class SubVid (QtWidgets.QApplication):  # Subclass QApplication
     super(SubVid, self).__init__(argv)  # Call constructor of superclass
 
     # Create a main window; code is handled in other file.
-    self._window = layouts_wrapper.MainDialog()
-    self._window.show()
+    startUUID = uuid4()
+    self._windows: dict = {
+        startUUID: layouts_wrapper.MainDialog(app=self, uuid=startUUID)}
+   #  self._window = layouts_wrapper.ImageViewer()
+    self._windows[startUUID].show()
 
     # The important part!
     # Wrapped in a try/except block since user may not have launched this program from a context menu
