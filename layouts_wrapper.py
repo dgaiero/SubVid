@@ -173,16 +173,54 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    def closeEvent(self, event):
       # self.app.exit()
+      # print(self.saveDataSame())
+      if (self.saveDataSame()) == False:
+         ret = self.showSaveQuitDialog()
+         if (ret == QtWidgets.QMessageBox.Save):
+            self.savePickle()
+         elif (ret == QtWidgets.QMessageBox.Cancel):
+            return
       self.preview_dialog.close()
       self.close()
       del self.app._windows[self.uuid]
       QtWidgets.QMainWindow.closeEvent(self, event)
+
+   def showSaveQuitDialog(self):
+      filename = os.path.basename(self.settings.saveFile)
+
+      msg = QtWidgets.QMessageBox(self)
+      # msg.setIcon(icon)
+      msg.setText(f'Do you want to save the changes you made to "{filename}"')
+      # msg.setInformativeText(informative_text)
+      msg.setWindowTitle('Unsaved Changes')
+      msg.setStandardButtons(QtWidgets.QMessageBox.Save)
+      msg.addButton("Don't Save", QtWidgets.QMessageBox.RejectRole)
+      msg.addButton(QtWidgets.QMessageBox.Cancel)
+      return msg.exec_()
+
+      layouts_helper.show_dialog_non_informative_text(self, "Done",
+         f'Do you want to save the changes you made to "{filename}"',
+         "",
+         buttons=QtWidgets.QMessageBox.Save |
+         QtWidgets.QMessageBox.Discard |
+         QtWidgets.QMessageBox.Cancel,
+         icon=QtWidgets.QMessageBox.NoIcon)
 
    def mousePressEvent(self, event):
       # print("clicked")
       if self.preview_graphic.underMouse():
          self.previewClicked.emit(QtCore.QPoint(event.pos()))
       QtWidgets.QMainWindow.mousePressEvent(self, event)
+
+   def saveDataSame(self) -> bool:
+      if (self.settings.saveFile is None):
+         return
+      currentData = pickle.dumps(self.settings.pickleData(),
+                                protocol=pickle.HIGHEST_PROTOCOL)
+      saveData = open(self.settings.saveFile, 'rb').read()
+      # print(currentData)
+      # print(saveData)
+      return currentData == saveData
 
    def newWindow(self):
       uuid = uuid4()
@@ -488,7 +526,6 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
    def __init__(self, parent=None):
       super(ImageViewer, self).__init__(parent)
       layouts_helper.configure_default_params(self)
-      # self.statusbar.setVisible(False)
       self.qScene = QGraphicsScene()
       self.MainWindow: MainDialog = parent
 
@@ -506,6 +543,15 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
 
       refreshShortcut = QShortcut(QKeySequence('Ctrl+R'), self)
       refreshShortcut.activated.connect(self.MainWindow.refreshVideo)
+
+      refreshShortcut2 = QShortcut(QKeySequence('R'), self)
+      refreshShortcut2.activated.connect(self.MainWindow.refreshVideo)
+
+      fullScreenShortcut = QShortcut(QKeySequence('Ctrl+F'), self)
+      fullScreenShortcut.activated.connect(self.toggleFullScreen)
+
+      fullScreenShortcut2 = QShortcut(QKeySequence('F'), self)
+      fullScreenShortcut2.activated.connect(self.toggleFullScreen)
 
    def resizePreview(self):
       scale_factor = self.preview_graphic.width()/self.qScene.width()
@@ -529,9 +575,20 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
          self.hide()
       QtWidgets.QMainWindow.keyPressEvent(self, event)
 
-   def mousePressEvent(self, event):
-      # print("clicked")
-      if self.preview_graphic.underMouse():
-         # print("clickedd")
-         self.hide()
-      QtWidgets.QMainWindow.mousePressEvent(self, event)
+   # def mousePressEvent(self, event):
+   #    # print("clicked")
+   #    if self.preview_graphic.underMouse():
+   #       # print("clickedd")
+   #       self.hide()
+   #       # self.showFullScreen()
+   #    QtWidgets.QMainWindow.mousePressEvent(self, event)
+
+   def toggleFullScreen(self):
+      if self.isFullScreen():
+         self.showNormal()
+      else:
+         self.showFullScreen()
+
+   def mouseDoubleClickEvent(self, event):
+      self.toggleFullScreen()
+      QtWidgets.QMainWindow.mouseDoubleClickEvent(self, event)
