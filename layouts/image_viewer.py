@@ -13,6 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ImageViewer(object):
     def setupUi(self, ImageViewer):
         ImageViewer.setObjectName("ImageViewer")
+        ImageViewer.setWindowModality(QtCore.Qt.NonModal)
         ImageViewer.resize(960, 540)
         ImageViewer.setIconSize(QtCore.QSize(20, 20))
         self.centralwidget = QtWidgets.QWidget(ImageViewer)
@@ -20,12 +21,14 @@ class Ui_ImageViewer(object):
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
         self.gridLayout.setObjectName("gridLayout")
-        self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setStyleSheet("background-color: rgb(0, 0, 0);")
-        self.graphicsView.setObjectName("graphicsView")
-        self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
+        self.preview_graphic = QtWidgets.QGraphicsView(self.centralwidget)
+        self.preview_graphic.setStyleSheet("background-color: rgb(0, 0, 0);")
+        self.preview_graphic.setObjectName("preview_graphic")
+        self.gridLayout.addWidget(self.preview_graphic, 0, 0, 1, 1)
         ImageViewer.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(ImageViewer)
+        self.statusbar.setEnabled(False)
+        self.statusbar.setSizeGripEnabled(False)
         self.statusbar.setObjectName("statusbar")
         ImageViewer.setStatusBar(self.statusbar)
 
