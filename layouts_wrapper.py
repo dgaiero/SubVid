@@ -81,6 +81,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.videoThread.finished.connect(self.cleanupVideoGeneration)
 
       self.actionOpen.triggered.connect(self.openPickle)
+      self.actionSave_As.triggered.connect(self.saveAsPickle)
       self.actionSave.triggered.connect(self.savePickle)
       self.actionNew.triggered.connect(self.newWindow)
 
@@ -103,7 +104,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          All Files (*.*)'
       fname = QFileDialog.getOpenFileName(self, 'Select SubVid Pickle File',
          self.fileOpenDialogDirectory, filters)
-      if fname[0] == '':
+      # print(fname)
+      if fname[0] == '' or fname is None:
          return
       self.readPickleFile(fname)
       
@@ -111,6 +113,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       with open(fname[0], 'rb') as handle:
          settings = pickle.load(handle)
       # print(**settings)
+      self.settings.saveFile = fname[0]
       self.settings.loadFromPickle(**settings)
       self.updateTextBoxFromSettings()
       if self.settings.background_frame != '':
@@ -127,20 +130,34 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             {self.settings.text_color[2]});")
       
    @_statusBarDecorator("Save Configuration File")
-   def savePickle(self):
+   def saveAsPickle(self):
       filters = 'SubVid Configuration File (*.svp)'
       fname = QFileDialog.getSaveFileName(self, 'Save As',
          self.fileOpenDialogDirectory, filters)
-      if fname[0] == '':
+      if (fname[0] == ''):
          return
-      with open(fname[0], 'wb') as handle:
+      self.savePickleFile(fname[0])
+      self.settings.saveFile = fname[0]
+
+   def savePickle(self):
+      if self.settings.saveFile is None:
+         return self.saveAsPickle()
+      self.savePickleFile(self.settings.saveFile)
+
+   def savePickleFile(self, fname):
+      with open(fname, 'wb') as handle:
          pickle.dump(self.settings.pickleData(), handle,
                      protocol=pickle.HIGHEST_PROTOCOL)
 
    def runUpdateEvents100ms(self):
       self.generate_video_button.setEnabled(self.settings.canGenerate())
       self.refresh_button.setEnabled(self.settings.canPreview())
+      self.setTitle()
       # self.checkFramePosition()
+
+   def setTitle(self):
+      if self.settings.saveFile is not None:
+         self.setWindowTitle(f"SubVideo ({self.settings.saveFile})")
 
    def resizeEvent(self, event):
       # print("resize")

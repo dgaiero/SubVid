@@ -15,6 +15,7 @@ class Settings():
       self.frameTextList = []
       self.framerate = 30
       self.videoInProgress = False
+      self.saveFile = None
 
    def pickleData(self):
       return {
