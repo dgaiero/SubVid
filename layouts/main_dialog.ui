@@ -3,7 +3,7 @@
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="windowModality">
-   <enum>Qt::ApplicationModal</enum>
+   <enum>Qt::NonModal</enum>
   </property>
   <property name="enabled">
    <bool>true</bool>
@@ -163,7 +163,7 @@
           <item>
            <widget class="QGraphicsView" name="preview_graphic">
             <property name="statusTip">
-             <string>Preview window for each frame</string>
+             <string>(Click for larger preview) Preview window for each frame</string>
             </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(0, 0, 0);</string>
@@ -635,8 +635,11 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew"/>
+    <addaction name="separator"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSave_As"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -689,6 +692,22 @@
    </property>
    <property name="shortcut">
     <string>Esc</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="text">
+    <string>Save As</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>
