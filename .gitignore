@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 .vscode/*
 installer/SubVid-cache/cacheIndex.txt
-installer/SubVid-cache/part1/disk1.cab
-installer/SubVid-cache/part1/output-info.ini
+installer/SubVid-cache/*
