@@ -12,8 +12,8 @@ import PyQt5.QtGui as QtGui
 import requests
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QThread
-from PyQt5.QtGui import QFont, QFontDatabase
-from PyQt5.QtWidgets import QFileDialog, QGraphicsScene
+from PyQt5.QtGui import QFont, QFontDatabase, QKeyEvent, QKeySequence
+from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QShortcut
 
 import layouts.image_viewer
 import layouts.license
@@ -23,9 +23,14 @@ from AppParameters import Settings
 from draw_background import convert_to_qt, draw_frame
 from GenerateVideo import GenerateVideo
 from Lyrics import Lyrics, MalFormedDataException
+from uuid import uuid4
 
 processes = set([])
 
+ALL_KEYS_DISABLED = 0
+NEXT_KEY_ENABLED = 1
+PREVIOUS_KEY_ENABLED = 2
+ALL_KEYS_ENABLED = 3
 
 def _statusBarDecorator(message):
    def statusBarDecorator(func):
@@ -40,10 +45,13 @@ def _statusBarDecorator(message):
 class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    previewClicked = QtCore.pyqtSignal(QtCore.QPoint)
+   imageChanged = QtCore.pyqtSignal(object)
 
-   def __init__(self, parent=None):
+   def __init__(self, app, uuid, parent=None):
       super(MainDialog, self).__init__(parent)
       layouts_helper.configure_default_params(self)
+      self.app = app
+      self.uuid = uuid
       self.settings: Settings = Settings()
       self.fileOpenDialogDirectory = os.path.expanduser('~')
       self.bindLicenseActions()
@@ -74,13 +82,16 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
       self.actionOpen.triggered.connect(self.openPickle)
       self.actionSave.triggered.connect(self.savePickle)
+      self.actionNew.triggered.connect(self.newWindow)
 
       self.updateColors()
 
-      # self.preview_dialog = ImageViewer()
-      # processes.add(self.preview_dialog)
+      self.preview_dialog = ImageViewer(self)
+      processes.add(self.preview_dialog)
       # self.actionAbout.triggered.connect(self.bindLargePreviewActions)
-      # self.previewClicked.connect(self.bindLargePreviewActions)
+      self.previewClicked.connect(self.bindLargePreviewActions)
+
+      self.checkFramePosition()
 
       timer100ms = QtCore.QTimer(self)
       timer100ms.timeout.connect(self.runUpdateEvents100ms)
@@ -129,7 +140,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    def runUpdateEvents100ms(self):
       self.generate_video_button.setEnabled(self.settings.canGenerate())
       self.refresh_button.setEnabled(self.settings.canPreview())
-      self.checkFramePosition()
+      # self.checkFramePosition()
 
    def resizeEvent(self, event):
       # print("resize")
@@ -143,10 +154,24 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.resizePreview()
       QtWidgets.QMainWindow.showEvent(self, event)
 
-   # def mousePressEvent(self, event):
-   #    if self.preview_graphic.underMouse():
-   #       self.previewClicked.emit(QtCore.QPoint(event.pos()))
-   #    QtWidgets.QMainWindow.mousePressEvent(self, event)
+   def closeEvent(self, event):
+      # self.app.exit()
+      self.preview_dialog.close()
+      self.close()
+      del self.app._windows[self.uuid]
+      QtWidgets.QMainWindow.closeEvent(self, event)
+
+   def mousePressEvent(self, event):
+      # print("clicked")
+      if self.preview_graphic.underMouse():
+         self.previewClicked.emit(QtCore.QPoint(event.pos()))
+      QtWidgets.QMainWindow.mousePressEvent(self, event)
+
+   def newWindow(self):
+      uuid = uuid4()
+      self.app._windows[uuid] = MainDialog(
+          app=self.app, uuid=uuid)
+      self.app._windows[uuid].show()
 
    def refreshVideo(self):
       self.setPreviewPicture()
@@ -175,35 +200,43 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       if (self.settings.videoInProgress):
          self.frame_previous_button.setEnabled(False)
          self.frame_next_button.setEnabled(False)
+         return ALL_KEYS_DISABLED
       if (self.settings.canPreview() == False):
          self.frame_previous_button.setEnabled(False)
          self.frame_next_button.setEnabled(False)
-         return
+         return ALL_KEYS_DISABLED
+      enabled = ALL_KEYS_DISABLED
       if self.settings.frameNumber == 0:
          self.frame_previous_button.setEnabled(False)
       else:
          self.frame_previous_button.setEnabled(True)
+         enabled |= PREVIOUS_KEY_ENABLED
       if self.settings.frameNumber == len(self.settings.frameTextList) - 1:
          self.frame_next_button.setEnabled(False)
       else:
          self.frame_next_button.setEnabled(True)
+         enabled |= NEXT_KEY_ENABLED
+      return enabled
 
    def showPreviousFrame(self):
-      self.settings.frameNumber -= 1
-      self.statusbar.showMessage(
-          f"Showing frame {self.settings.frameNumber}", msecs=1000)
-      self.setPreviewPicture()
+      if ((self.checkFramePosition() & PREVIOUS_KEY_ENABLED) >= 1):
+         self.settings.frameNumber -= 1
+         self.statusbar.showMessage(
+            f"Showing frame {self.settings.frameNumber + 1}", msecs=1000)
+         self.setPreviewPicture()
 
    def showNextFrame(self):
-      self.settings.frameNumber += 1
-      self.statusbar.showMessage(
-          f"Showing frame {self.settings.frameNumber}", msecs=1000)
-      self.setPreviewPicture()
+      if ((self.checkFramePosition() & NEXT_KEY_ENABLED) >= 1):
+         self.settings.frameNumber += 1
+         self.statusbar.showMessage(
+            f"Showing frame {self.settings.frameNumber + 1}", msecs=1000)
+         self.setPreviewPicture()
 
    def setPreviewPicture(self):
-      pilImg = draw_frame(self.settings, self.settings.frameTextList[self.settings.frameNumber].line)
-      self.settings.preview_frame = convert_to_qt(pilImg)
-      self.resizePreview()
+      if self.checkFramePosition() >= 1:
+         pilImg = draw_frame(self.settings, self.settings.frameTextList[self.settings.frameNumber].line)
+         self.settings.preview_frame = convert_to_qt(pilImg)
+         self.resizePreview()
 
    def _generateVideo(self):
       self.generate_video_status_label = QtWidgets.QLabel()
@@ -384,11 +417,19 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.preview_graphic.scale(scale_factor,scale_factor)
       self.preview_graphic.fitInView(scene.sceneRect(), mode=QtCore.Qt.KeepAspectRatio)
       self.preview_graphic.setScene(scene)
+      self.preview_dialog.qScene = scene
+      self.preview_dialog.resizePreview()
+      if self.settings.canPreview():
+         self.preview_dialog.setWindowTitle(f"Scene Viewer: Frame {self.settings.frameNumber + 1}")
+      # Emit to signal here with QGraphicsScene
 
    def bindLicenseActions(self):
       license_view_dialog = LicenseWindow()
       processes.add(license_view_dialog)
       self.actionAbout.triggered.connect(license_view_dialog.show)
+
+   def bindLargePreviewActions(self):
+      self.preview_dialog.show()
 
 class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
    def __init__(self, parent=None):
@@ -430,8 +471,50 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
    def __init__(self, parent=None):
       super(ImageViewer, self).__init__(parent)
       layouts_helper.configure_default_params(self)
+      # self.statusbar.setVisible(False)
+      self.qScene = QGraphicsScene()
+      self.MainWindow: MainDialog = parent
 
-   # def mousePressEvent(self, event):
-   #    print("clicked")
-   #    self.hide()
-   #    QtWidgets.QMainWindow.mousePressEvent(self, event)
+      nextShortcut = QShortcut(QKeySequence('Ctrl+N'), self)
+      nextShortcut.activated.connect(self.MainWindow.showNextFrame)
+
+      nextShortcut2 = QShortcut(QKeySequence('N'), self)
+      nextShortcut2.activated.connect(self.MainWindow.showNextFrame)
+
+      prevShortcut = QShortcut(QKeySequence('Ctrl+P'), self)
+      prevShortcut.activated.connect(self.MainWindow.showPreviousFrame)
+
+      prevShortcut2 = QShortcut(QKeySequence('P'), self)
+      prevShortcut2.activated.connect(self.MainWindow.showPreviousFrame)
+
+      refreshShortcut = QShortcut(QKeySequence('Ctrl+R'), self)
+      refreshShortcut.activated.connect(self.MainWindow.refreshVideo)
+
+   def resizePreview(self):
+      scale_factor = self.preview_graphic.width()/self.qScene.width()
+      self.preview_graphic.scale(scale_factor,scale_factor)
+      self.preview_graphic.fitInView(self.qScene.sceneRect(), mode=QtCore.Qt.KeepAspectRatio)
+      self.preview_graphic.setScene(self.qScene)
+
+   def showEvent(self, event):
+      # print("show")
+      self.resizePreview()
+      QtWidgets.QMainWindow.showEvent(self, event)
+
+   def resizeEvent(self, event):
+      # print("resize")
+      self.resizePreview()
+      QtWidgets.QMainWindow.resizeEvent(self, event)
+
+   def keyPressEvent(self, event):
+      pressEvent: QKeyEvent = event
+      if (pressEvent.key() == QtCore.Qt.Key_Escape):
+         self.hide()
+      QtWidgets.QMainWindow.keyPressEvent(self, event)
+
+   def mousePressEvent(self, event):
+      # print("clicked")
+      if self.preview_graphic.underMouse():
+         # print("clickedd")
+         self.hide()
+      QtWidgets.QMainWindow.mousePressEvent(self, event)
