@@ -26,11 +26,6 @@ class Ui_ImageViewer(object):
         self.preview_graphic.setObjectName("preview_graphic")
         self.gridLayout.addWidget(self.preview_graphic, 0, 0, 1, 1)
         ImageViewer.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(ImageViewer)
-        self.statusbar.setEnabled(False)
-        self.statusbar.setSizeGripEnabled(False)
-        self.statusbar.setObjectName("statusbar")
-        ImageViewer.setStatusBar(self.statusbar)
 
         self.retranslateUi(ImageViewer)
         QtCore.QMetaObject.connectSlotsByName(ImageViewer)
