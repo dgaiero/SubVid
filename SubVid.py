@@ -29,6 +29,7 @@ class SubVid (QtWidgets.QApplication):  # Subclass QApplication
 
     # Create a main window; code is handled in other file.
     startUUID = uuid4()
+    self.license_view_dialog = layouts_wrapper.LicenseWindow()
     self._windows: dict = {
         startUUID: layouts_wrapper.MainDialog(app=self, uuid=startUUID)}
    #  self._window = layouts_wrapper.ImageViewer()
