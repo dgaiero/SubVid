@@ -479,9 +479,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       # Emit to signal here with QGraphicsScene
 
    def bindLicenseActions(self):
-      license_view_dialog = LicenseWindow()
-      processes.add(license_view_dialog)
-      self.actionAbout.triggered.connect(license_view_dialog.show)
+      self.actionAbout.triggered.connect(self.app.license_view_dialog.show)
 
    def bindLargePreviewActions(self):
       self.preview_dialog.show()
@@ -493,13 +491,10 @@ class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
       self.setWindowFlags(QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
       self.viewLicenseOnlineButton.clicked.connect(self.viewLicense)
       self.viewAddendumOnlineButton.clicked.connect(self.viewAddendum)
-      self.license_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/LICENSE.LGPL'
-      self.addendum_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/COPYING.LESSER'
-      license_text = requests.get(self.license_url)
-      addendum_text = requests.get(self.addendum_url)
-      self.licenseText.setPlainText(license_text.text)
-      self.addendumText.setPlainText(addendum_text.text)
-      # self.licenseText.setFont()
+      license_text = open('LICENSE.LGPL').read()
+      addendum_text = open('COPYING.LESSER').read()
+      self.licenseText.setPlainText(license_text)
+      self.addendumText.setPlainText(addendum_text)
       id = QFontDatabase.addApplicationFont(":/fonts/FiraCode-Regular.ttf")
       _fontstr = QFontDatabase.applicationFontFamilies(id)[0]
       _font = QFont(_fontstr, 8)
