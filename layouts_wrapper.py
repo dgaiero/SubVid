@@ -85,6 +85,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.actionSave.triggered.connect(self.savePickle)
       self.actionNew.triggered.connect(self.newWindow)
 
+      self.background_preview.setRenderHint(QtGui.QPainter.SmoothPixmapTransform )
+      self.preview_graphic.setRenderHint(QtGui.QPainter.SmoothPixmapTransform )
+
       self.updateColors()
 
       self.preview_dialog = ImageViewer(self)
@@ -547,6 +550,8 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
 
       fullScreenShortcut2 = QShortcut(QKeySequence('F'), self)
       fullScreenShortcut2.activated.connect(self.toggleFullScreen)
+
+      self.preview_graphic.setRenderHint(QtGui.QPainter.SmoothPixmapTransform )
 
    def resizePreview(self):
       scale_factor = self.preview_graphic.width()/self.qScene.width()
