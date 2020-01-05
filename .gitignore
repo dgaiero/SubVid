@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 .vscode/*
 installer/SubVid-cache/cacheIndex.txt
-installer/SubVid-cache/*
-instaler/ExeBuildSetupFiles/*
-installer/Setup Files/*
+installer/SubVid-cache/
+instaler/ExeBuildSetupFiles/
+installer/Setup Files/
