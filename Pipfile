@@ -5,11 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 autopep8 = "*"
+pylint = "*"
 
 [packages]
 pyqt5 = "*"
 requests = "*"
-tablib = "*"
+tablib = "==0.14.0"
 binaryornot = "*"
 pillow = "*"
 opencv-python = "*"
