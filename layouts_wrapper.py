@@ -81,7 +81,6 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
       self.preview_dialog = ImageViewer(self)
       processes.add(self.preview_dialog)
-      # self.actionAbout.triggered.connect(self.bindLargePreviewActions)
       self.previewClicked.connect(self.bindLargePreviewActions)
 
       self.checkFramePosition()
@@ -98,11 +97,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    def openConfig(self):
       filters = 'SubVid Configuration File (*.svp);;\
          All Files (*.*)'
-      # options = QFileDialog.Options()
-      # options |= QFileDialog.DontUseNativeDialog
       fname = QFileDialog.getOpenFileName(self, 'Select SubVid Configuration File',
          self.fileOpenDialogDirectory, filters)
-      # print(fname)
       if fname[0] == '' or fname is None:
          return
       self.readConfigFile(fname)
@@ -112,9 +108,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          settings = json.load(handle)
       self.settings.saveFile = fname[0]
       self.settings.loadFromConfig(**settings)
-      # print(self.settings.source_time)
       filesNotFoundList = self.checkFilesExist()
-      # print(filesNotFoundList)
       if (filesNotFoundList != []):
          self.fnf.set_data(filesNotFoundList)
          self.fnf.show()
@@ -161,8 +155,6 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.saveConfigFile(self.settings.saveFile)
 
    def saveConfigFile(self, fname):
-      # print(self.settings.output_location)
-      # pprint(json.dumps(self.settings.configData()))
       with open(fname, 'w') as handle:
          json.dump(self.settings.configData(), handle)
 
@@ -170,27 +162,22 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.generate_video_button.setEnabled(self.settings.canGenerate())
       self.refresh_button.setEnabled(self.settings.canPreview())
       self.setTitle()
-      # self.checkFramePosition()
 
    def setTitle(self):
       if self.settings.saveFile is not None:
          self.setWindowTitle(f"SubVideo ({self.settings.saveFile})")
 
    def resizeEvent(self, event):
-      # print("resize")
       self.resizeBackgroundImage()
       self.resizePreview()
       QtWidgets.QMainWindow.resizeEvent(self, event)
 
    def showEvent(self, event):
-      # print("show")
       self.resizeBackgroundImage()
       self.resizePreview()
       QtWidgets.QMainWindow.showEvent(self, event)
 
    def closeEvent(self, event):
-      # self.app.exit()
-      # print(self.saveDataSame())
       closeAccept = True
       if (self.saveDataSame()) == False:
          ret = self.showSaveQuitDialog()
@@ -209,9 +196,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       filename = os.path.basename(self.settings.saveFile)
 
       msg = QtWidgets.QMessageBox(self)
-      # msg.setIcon(icon)
       msg.setText(f'Do you want to save the changes you made to "{filename}"')
-      # msg.setInformativeText(informative_text)
       msg.setWindowTitle('Unsaved Changes')
       msg.setStandardButtons(QtWidgets.QMessageBox.Save)
       msg.addButton("Don't Save", QtWidgets.QMessageBox.RejectRole)
@@ -227,7 +212,6 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          icon=QtWidgets.QMessageBox.NoIcon)
 
    def mousePressEvent(self, event):
-      # print("clicked")
       if self.preview_graphic.underMouse():
          self.previewClicked.emit(QtCore.QPoint(event.pos()))
       QtWidgets.QMainWindow.mousePressEvent(self, event)
@@ -237,8 +221,6 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          return
       currentData = json.dumps(self.settings.configData())
       saveData = open(self.settings.saveFile, 'r').read()
-      # print(currentData)
-      # print(saveData)
       return currentData == saveData
 
    def newWindow(self):
@@ -379,17 +361,14 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.processSourceTimeData(fname)
 
    def processSourceTimeData(self, fname):
-      # print(f"fname[0] = {fname[0]}")
       if fname[0] != '':
-         self.settings.source_time = fname[0]
-         # print(self.settings.source_time)
+         self.settings.source_time = os.path.normpath(fname[0])
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.source_time)
          self.source_time_tb.setText(self.settings.source_time)
          self.readSourceTimeData()
 
    @_statusBarDecorator("Reading source time data")
    def readSourceTimeData(self):
-      # print(f"Reading Source time data from: {self.settings.source_time}")
       frameText = Lyrics(self.settings.source_time,
          str(self.settings.framerate))
       frameText.importData()
@@ -506,6 +485,8 @@ class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
       self.viewAddendumOnlineButton.clicked.connect(self.viewAddendum)
       license_text = open('LICENSE.LGPL').read()
       addendum_text = open('COPYING.LESSER').read()
+      self.license_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/LICENSE.LGPL'
+      self.addendum_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/COPYING.LESSER'
       self.licenseText.setPlainText(license_text)
       self.addendumText.setPlainText(addendum_text)
       id = QFontDatabase.addApplicationFont(":/fonts/FiraCode-Regular.ttf")
@@ -570,12 +551,10 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
       self.preview_graphic.setScene(self.qScene)
 
    def showEvent(self, event):
-      # print("show")
       self.resizePreview()
       QtWidgets.QMainWindow.showEvent(self, event)
 
    def resizeEvent(self, event):
-      # print("resize")
       self.resizePreview()
       QtWidgets.QMainWindow.resizeEvent(self, event)
 
@@ -584,14 +563,6 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
       if (pressEvent.key() == QtCore.Qt.Key_Escape):
          self.hide()
       QtWidgets.QMainWindow.keyPressEvent(self, event)
-
-   # def mousePressEvent(self, event):
-   #    # print("clicked")
-   #    if self.preview_graphic.underMouse():
-   #       # print("clickedd")
-   #       self.hide()
-   #       # self.showFullScreen()
-   #    QtWidgets.QMainWindow.mousePressEvent(self, event)
 
    def toggleFullScreen(self):
       if self.isFullScreen():
@@ -615,7 +586,6 @@ class FileNotFound(QtWidgets.QMainWindow, layouts.file_not_found.Ui_FileNotFound
 
       self.file_locator_view.cellClicked.connect(self.actionRow)
       self.file_locator_view.cellDoubleClicked.connect(self.locateFile)
-      # self.file_locator_view.cellChanged.connect(self.actionRow)
 
       self.locateButton.setEnabled(False)
       self.clearFileButton.setEnabled(False)
@@ -626,7 +596,6 @@ class FileNotFound(QtWidgets.QMainWindow, layouts.file_not_found.Ui_FileNotFound
    def actionRow(self):
       self.currentRow = self.file_locator_view.currentRow()
       self.currentItemUsedIn = self.file_locator_view.item(self.currentRow, 0).text()
-      # print(self.currentItemUsedIn)
       self.currentItemFileName = self.file_locator_view.item(self.currentRow, 1).text()
       self.currentItemFilePath = self.file_locator_view.item(
           self.currentRow, 2).text()
@@ -636,7 +605,6 @@ class FileNotFound(QtWidgets.QMainWindow, layouts.file_not_found.Ui_FileNotFound
 
    def locateFileProc(self, findFileFunc, mainWindowProc):
       ret = findFileFunc
-      # print(ret)
       if os.path.isfile(ret[0]):
          mainWindowProc(ret)
          self.removeRow(self.currentRow)
@@ -675,9 +643,9 @@ class FileNotFound(QtWidgets.QMainWindow, layouts.file_not_found.Ui_FileNotFound
       self.file_locator_view.horizontalHeader()
 
    def set_data(self, data: list):
+      self.file_locator_view.setRowCount(0)
       for row in data:
          inx = data.index(row)
-         # print(row)
          self.file_locator_view.insertRow(inx)
          for i in range(len(row)):
             self.file_locator_view.setItem(inx,i,QtWidgets.QTableWidgetItem(str(row[i])))
