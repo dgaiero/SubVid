@@ -9,7 +9,6 @@ from uuid import uuid4
 import cv2
 import numpy
 import PyQt5.QtGui as QtGui
-import requests
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QFont, QFontDatabase, QKeyEvent, QKeySequence
@@ -260,10 +259,10 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.settings.sound_track = self.sound_track_tb.text()
 
    def updateFontTextBox(self):
-      self.settings.font = self.font_tb.text()
+      self.settings.font = os.path.normpath(self.font_tb.text())
 
    def updateVideoLocationTextBox(self):
-      self.settings.output_location = self.video_location_tb.text()
+      self.settings.output_location = os.path.normpath(self.video_location_tb.text())
 
    def updateTextBoxFromSettings(self):
       self.source_time_tb.setText(self.settings.source_time)
@@ -323,7 +322,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.videoThread.settings = self.settings
       self.videoThread.start()
 
-   def toggleButtoms(self, tstatus, vIP):
+   def toggleButtoms(self, tstatus, video_in_progress_status):
       self.source_time_button.setEnabled(tstatus)
       self.sound_track_button.setEnabled(tstatus)
       self.font_button.setEnabled(tstatus)
@@ -333,7 +332,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.blue_spin_box.setEnabled(tstatus)
       self.background_button.setEnabled(tstatus)
       self.video_location_button.setEnabled(tstatus)
-      self.settings.videoInProgress = vIP
+      self.actionOpen.setEnabled(tstatus)
+      self.settings.videoInProgress = video_in_progress_status
 
    def toggleTextBoxes(self, tstatus):
       self.source_time_tb.setEnabled(tstatus)
