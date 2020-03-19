@@ -1,5 +1,4 @@
 import datetime
-import functools
 import json
 import os
 import sys
@@ -20,6 +19,7 @@ import layouts.license
 import layouts.main_dialog
 import layouts_helper
 from AppParameters import Settings
+from decorators import _checkFileExists, _statusBarDecorator
 from draw_background import convert_to_qt, draw_frame
 from GenerateVideo import GenerateVideo
 from Lyrics import Lyrics, MalFormedDataException
@@ -30,16 +30,6 @@ ALL_KEYS_DISABLED = 0
 NEXT_KEY_ENABLED = 1
 PREVIOUS_KEY_ENABLED = 2
 ALL_KEYS_ENABLED = 3
-
-def _statusBarDecorator(message):
-   def statusBarDecorator(func):
-      @functools.wraps(func)
-      def statusBarMessage_wrapper(self, *args, **kwargs):
-         self.statusbar.showMessage(message)
-         func(self)
-         self.statusbar.clearMessage()
-      return statusBarMessage_wrapper
-   return statusBarDecorator
 
 class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
