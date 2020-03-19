@@ -2,7 +2,6 @@ import datetime
 import functools
 import json
 import os
-import pickle
 import sys
 import webbrowser
 
@@ -80,9 +79,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.videoThread.success.connect(self.generationSuccessCheck)
       self.videoThread.finished.connect(self.cleanupVideoGeneration)
 
-      self.actionOpen.triggered.connect(self.openPickle)
-      self.actionSave_As.triggered.connect(self.saveAsPickle)
-      self.actionSave.triggered.connect(self.savePickle)
+      self.actionOpen.triggered.connect(self.openConfig)
+      self.actionSave_As.triggered.connect(self.saveAsConfig)
+      self.actionSave.triggered.connect(self.saveConfig)
       self.actionNew.triggered.connect(self.newWindow)
 
       self.background_preview.setRenderHint(QtGui.QPainter.SmoothPixmapTransform )
@@ -102,22 +101,33 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       timer100ms.start(100) # 100 ms refesh rate
 
    @_statusBarDecorator("Open Configuration File")
-   def openPickle(self):
+   def openConfig(self):
       filters = 'SubVid Configuration File (*.svp);;\
          All Files (*.*)'
-      fname = QFileDialog.getOpenFileName(self, 'Select SubVid Pickle File',
+      # options = QFileDialog.Options()
+      # options |= QFileDialog.DontUseNativeDialog
+      fname = QFileDialog.getOpenFileName(self, 'Select SubVid Configuration File',
          self.fileOpenDialogDirectory, filters)
       # print(fname)
       if fname[0] == '' or fname is None:
          return
-      self.readPickleFile(fname)
+      self.readConfigFile(fname)
       
-   def readPickleFile(self, fname):
-      with open(fname[0], 'rb') as handle:
-         settings = pickle.load(handle)
-      # print(**settings)
+   def readConfigFile(self, fname):
+      with open(fname[0], 'r') as handle:
+         settings = json.load(handle)
       self.settings.saveFile = fname[0]
-      self.settings.loadFromPickle(**settings)
+      self.settings.loadFromConfig(**settings)
+      # print(self.settings.source_time)
+      filesNotFoundList = self.checkFilesExist()
+      # print(filesNotFoundList)
+      if (filesNotFoundList != []):
+         self.fnf.set_data(filesNotFoundList)
+         self.fnf.show()
+      else:
+         self.loadConfigurationToUI(settings)
+
+   def loadConfigurationToUI(self, settings):
       self.updateTextBoxFromSettings()
       if self.settings.background_frame != '':
          self.resizeBackgroundImage()
@@ -133,24 +143,25 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             {self.settings.text_color[2]});")
       
    @_statusBarDecorator("Save Configuration File")
-   def saveAsPickle(self):
+   def saveAsConfig(self):
       filters = 'SubVid Configuration File (*.svp)'
       fname = QFileDialog.getSaveFileName(self, 'Save As',
          self.fileOpenDialogDirectory, filters)
       if (fname[0] == ''):
          return
-      self.savePickleFile(fname[0])
+      self.saveConfigFile(fname[0])
       self.settings.saveFile = fname[0]
 
-   def savePickle(self):
+   def saveConfig(self):
       if self.settings.saveFile is None:
-         return self.saveAsPickle()
-      self.savePickleFile(self.settings.saveFile)
+         return self.saveAsConfig()
+      self.saveConfigFile(self.settings.saveFile)
 
-   def savePickleFile(self, fname):
-      with open(fname, 'wb') as handle:
-         pickle.dump(self.settings.pickleData(), handle,
-                     protocol=pickle.HIGHEST_PROTOCOL)
+   def saveConfigFile(self, fname):
+      # print(self.settings.output_location)
+      # pprint(json.dumps(self.settings.configData()))
+      with open(fname, 'w') as handle:
+         json.dump(self.settings.configData(), handle)
 
    def runUpdateEvents100ms(self):
       self.generate_video_button.setEnabled(self.settings.canGenerate())
@@ -218,9 +229,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    def saveDataSame(self) -> bool:
       if (self.settings.saveFile is None):
          return
-      currentData = pickle.dumps(self.settings.pickleData(),
-                                protocol=pickle.HIGHEST_PROTOCOL)
-      saveData = open(self.settings.saveFile, 'rb').read()
+      currentData = json.dumps(self.settings.configData())
+      saveData = open(self.settings.saveFile, 'r').read()
       # print(currentData)
       # print(saveData)
       return currentData == saveData
