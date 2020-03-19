@@ -12,8 +12,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>500</height>
+    <width>1010</width>
+    <height>523</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -624,8 +624,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1000</width>
-     <height>20</height>
+     <width>1010</width>
+     <height>22</height>
     </rect>
    </property>
    <property name="nativeMenuBar">

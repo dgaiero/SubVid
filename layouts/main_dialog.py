@@ -267,7 +267,7 @@ class Ui_MainWindow(object):
         self.gridLayout_4.addLayout(self.verticalLayout_3, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 20))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1000, 22))
         self.menubar.setNativeMenuBar(True)
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
