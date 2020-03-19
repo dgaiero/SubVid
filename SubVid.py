@@ -1,22 +1,16 @@
 import ctypes
 import os
 import sys
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QSplashScreen
-from PyQt5.QtCore import pyqtSlot
-import error_handler
 from uuid import uuid4
 
-# import configuration_wizard
-import layouts_wrapper
-# from configuration_wizard import ConfigurationWindow
-# from read_common_config import CommonConfig, NoConfigFoundError
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QSplashScreen
+
+import error_handler
 import layouts_helper
-# import AppParameters
-# from colorama import init as coloramaInit
-# from setup_forms import *
+import layouts_wrapper
 
 qt_exception_hook = error_handler.UncaughtHook()
 
