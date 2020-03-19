@@ -7,30 +7,15 @@ def draw_frame(appData: Settings, text: list):
    img: Image = Image.open(appData.background_frame)
    W, H = img.size
    draw = ImageDraw.Draw(img)
-   # font = ImageFont.truetype(<font-file>, <font-size>)
    font = ImageFont.truetype(appData.font, appData.font_size)
-   # draw.text((x, y),"Sample Text",(r,g,b))
-   # width, total_height = draw.textsize("abcdefghijklmnopqrstuvwxyz", font)
    h = font.getsize('hg')[1]
    list_text_height = h * len(text)
-   # print(list_text_height)
-   # print(h)
-   # for i in range(len(text)):
-   if (len(text) == 2):
-      ctext = text[0]
-      w, cth = draw.textsize(ctext,font)
-      draw.text(((W-w)/2, ((H-h)/2) - h/2),
-                  ctext, tuple(appData.text_color), font=font)
-
-      ctext = text[1]
+   for i in range(len(text)):
+      ctext = text[i]
       w, cth = draw.textsize(ctext, font)
-      draw.text(((W-w)/2, ((H-h)/2) + h/2),
-               ctext, tuple(appData.text_color), font=font)
-   if (len(text) == 1):
-      ctext = text[0]
-      w, cth = draw.textsize(ctext, font)
-      draw.text(((W-w)/2, ((H-h)/2)),
-               ctext, tuple(appData.text_color), font=font)
+      x_cord = (W-w)/2
+      y_cord = (H-h*len(text))/2+(i*h)
+      draw.text((x_cord, y_cord), ctext, tuple(appData.text_color), font=font)
    return img
 
 def convert_to_qt(image):
