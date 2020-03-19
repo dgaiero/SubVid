@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import webbrowser
+from uuid import uuid4
 
 import cv2
 import numpy
@@ -100,6 +101,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       timer100ms.timeout.connect(self.runUpdateEvents100ms)
       timer100ms.start(100) # 100 ms refesh rate
 
+      processes.add(self.fnf)
+   
+   
    @_statusBarDecorator("Open Configuration File")
    def openConfig(self):
       filters = 'SubVid Configuration File (*.svp);;\
@@ -188,12 +192,15 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    def closeEvent(self, event):
       # self.app.exit()
       # print(self.saveDataSame())
+      closeAccept = True
       if (self.saveDataSame()) == False:
          ret = self.showSaveQuitDialog()
          if (ret == QtWidgets.QMessageBox.Save):
-            self.savePickle()
+            self.saveConfig()
          elif (ret == QtWidgets.QMessageBox.Cancel):
-            return
+            closeAccept = False
+            event.ignore()
+      if closeAccept:
       self.preview_dialog.close()
       self.close()
       del self.app._windows[self.uuid]
