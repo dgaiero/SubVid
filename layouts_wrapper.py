@@ -229,6 +229,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
           app=self.app, uuid=uuid)
       self.app._windows[uuid].show()
 
+   @_checkFileExists
    def refreshVideo(self):
       self.setPreviewPicture()
 
@@ -274,6 +275,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          enabled |= NEXT_KEY_ENABLED
       return enabled
 
+   @_checkFileExists
    def showPreviousFrame(self):
       if ((self.checkFramePosition() & PREVIOUS_KEY_ENABLED) >= 1):
          self.settings.frameNumber -= 1
@@ -281,6 +283,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             f"Showing frame {self.settings.frameNumber + 1}", msecs=1000)
          self.setPreviewPicture()
 
+   @_checkFileExists
    def showNextFrame(self):
       if ((self.checkFramePosition() & NEXT_KEY_ENABLED) >= 1):
          self.settings.frameNumber += 1
@@ -294,6 +297,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.settings.preview_frame = convert_to_qt(pilImg)
          self.resizePreview()
 
+   @_checkFileExists
    def _generateVideo(self):
       self.generate_video_status_label = QtWidgets.QLabel()
       self.statusbar.addPermanentWidget(
