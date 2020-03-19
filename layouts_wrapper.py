@@ -14,6 +14,7 @@ from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QFont, QFontDatabase, QKeyEvent, QKeySequence
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QShortcut
 
+import layouts.file_not_found
 import layouts.image_viewer
 import layouts.license
 import layouts.main_dialog
@@ -99,6 +100,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       timer100ms.timeout.connect(self.runUpdateEvents100ms)
       timer100ms.start(100) # 100 ms refesh rate
 
+      self.fnf = FileNotFound(self)
       processes.add(self.fnf)
    
    
@@ -144,6 +146,15 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             {self.settings.text_color[1]}, \
             {self.settings.text_color[2]});")
       
+   def checkFilesExist(self):
+      filesToCheckList = ["source_time", "sound_track", "font", "background_frame"]
+      filesNotFoundList = []
+      for file in filesToCheckList:
+         if not(self.settings.checkFileExists(file)):
+            filesNotFoundList.append([file, self.settings.getFileName(file), eval(f"self.settings.{file}")])
+      return filesNotFoundList
+
+
    @_statusBarDecorator("Save Configuration File")
    def saveAsConfig(self):
       filters = 'SubVid Configuration File (*.svp)'
@@ -199,10 +210,10 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             closeAccept = False
             event.ignore()
       if closeAccept:
-      self.preview_dialog.close()
-      self.close()
-      del self.app._windows[self.uuid]
-      QtWidgets.QMainWindow.closeEvent(self, event)
+         self.preview_dialog.close()
+         self.close()
+         del self.app._windows[self.uuid]
+         QtWidgets.QMainWindow.closeEvent(self, event)
 
    def showSaveQuitDialog(self):
       filename = os.path.basename(self.settings.saveFile)
@@ -389,20 +400,20 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
    @_statusBarDecorator("Reading source time data")
    def readSourceTimeData(self):
       # print(f"Reading Source time data from: {self.settings.source_time}")
-         frameText = Lyrics(self.settings.source_time,
-            str(self.settings.framerate))
-         frameText.importData()
-         try:
-            frameText.readData()
-            self.settings.frameTextList = frameText.timecode_frames
-            self.video_generation_progress.setMaximum(len(self.settings.frameTextList) + 1)
-         except ValueError as e:
-            layouts_helper.show_dialog_non_informative_text(
-                self, "Error", f"<b>Value Error:</b> {str(e)}", "", buttons=QtWidgets.QMessageBox.Ok)
-         except MalFormedDataException as e:
-            extended_text = f"{e.message}\nActual Headers: {', '.join(e.actual_headers)}"
-            layouts_helper.show_dialog_detailed_text(
-                self, "Error", f"Error: {e.message}", "Informative Text", extended_text)
+      frameText = Lyrics(self.settings.source_time,
+         str(self.settings.framerate))
+      frameText.importData()
+      try:
+         frameText.readData()
+         self.settings.frameTextList = frameText.timecode_frames
+         self.video_generation_progress.setMaximum(len(self.settings.frameTextList) + 1)
+      except ValueError as e:
+         layouts_helper.show_dialog_non_informative_text(
+             self, "Error", f"<b>Value Error:</b> {str(e)}", "", buttons=QtWidgets.QMessageBox.Ok)
+      except MalFormedDataException as e:
+         extended_text = f"{e.message}\nActual Headers: {', '.join(e.actual_headers)}"
+         layouts_helper.show_dialog_detailed_text(
+             self, "Error", f"Error: {e.message}", "Informative Text", extended_text)
 
    @_statusBarDecorator("Browse for a font")
    def getParamFont(self):
@@ -601,3 +612,82 @@ class ImageViewer(QtWidgets.QMainWindow, layouts.image_viewer.Ui_ImageViewer):
    def mouseDoubleClickEvent(self, event):
       self.toggleFullScreen()
       QtWidgets.QMainWindow.mouseDoubleClickEvent(self, event)
+
+
+class FileNotFound(QtWidgets.QMainWindow, layouts.file_not_found.Ui_FileNotFound):
+   def __init__(self, parent=None):
+      super(FileNotFound, self).__init__(parent)
+      layouts_helper.configure_default_params(self)
+      self.MainWindow: MainDialog = parent
+      self.closeButton.clicked.connect(self.close)
+      self.file_locator_view.setColumnCount(3)
+      self.configure_headers()
+
+      self.file_locator_view.cellClicked.connect(self.actionRow)
+      self.file_locator_view.cellDoubleClicked.connect(self.locateFile)
+      # self.file_locator_view.cellChanged.connect(self.actionRow)
+
+      self.locateButton.setEnabled(False)
+      self.clearFileButton.setEnabled(False)
+
+      self.locateButton.clicked.connect(self.locateFile)
+      self.clearFileButton.clicked.connect(self.initalizeFileValue)
+
+   def actionRow(self):
+      self.currentRow = self.file_locator_view.currentRow()
+      self.currentItemUsedIn = self.file_locator_view.item(self.currentRow, 0).text()
+      # print(self.currentItemUsedIn)
+      self.currentItemFileName = self.file_locator_view.item(self.currentRow, 1).text()
+      self.currentItemFilePath = self.file_locator_view.item(
+          self.currentRow, 2).text()
+
+      self.locateButton.setEnabled(True)
+      self.clearFileButton.setEnabled(True)
+
+   def locateFileProc(self, findFileFunc, mainWindowProc):
+      ret = findFileFunc
+      # print(ret)
+      if os.path.isfile(ret[0]):
+         mainWindowProc(ret)
+         self.removeRow(self.currentRow)
+
+   def locateFile(self):
+      if self.currentItemUsedIn == "source_time":
+         self.locateFileProc(self.MainWindow.settings.getSourceTime(
+             self, self.currentItemFilePath), self.MainWindow.processSourceTimeData)
+      elif self.currentItemUsedIn == "sound_track":
+         self.locateFileProc(self.MainWindow.settings.getSoundTrack(
+             self, self.currentItemFilePath), self.MainWindow.processSoundTrack)
+      elif self.currentItemUsedIn == "font":
+         self.locateFileProc(self.MainWindow.settings.getParamFont(
+             self, self.currentItemFilePath, True), self.MainWindow.processParamFont)
+      elif self.currentItemUsedIn == "background_frame":
+         self.locateFileProc(self.MainWindow.settings.getBackgroundImage(
+             self, self.currentItemFilePath), self.MainWindow.processBackgroundImage)
+
+   def removeRow(self, row: int):
+      self.file_locator_view.removeRow(row)
+      if self.file_locator_view.rowCount() == 0:
+         self.hide()
+         self.MainWindow.loadConfigurationToUI(self.MainWindow.settings)
+
+   def initalizeFileValue(self):
+      self.MainWindow.settings.initLine(self.currentItemUsedIn)
+      self.removeRow(self.currentRow)
+
+   def closeEvent(self, event):
+      self.MainWindow.close()
+      QtWidgets.QMainWindow.closeEvent(self, event)
+
+   def configure_headers(self):
+      column_labels = ["Description", "File Name", "File Path"]
+      self.file_locator_view.setHorizontalHeaderLabels(column_labels)
+      self.file_locator_view.horizontalHeader()
+
+   def set_data(self, data: list):
+      for row in data:
+         inx = data.index(row)
+         # print(row)
+         self.file_locator_view.insertRow(inx)
+         for i in range(len(row)):
+            self.file_locator_view.setItem(inx,i,QtWidgets.QTableWidgetItem(str(row[i])))
