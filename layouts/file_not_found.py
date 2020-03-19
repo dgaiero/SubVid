@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'file_not_found.ui'
 #
-# Created by: PyQt5 UI code generator 5.14.0
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -81,4 +81,4 @@ class Ui_FileNotFound(object):
         self.file_locator_view.setSortingEnabled(True)
         self.locateButton.setText(_translate("FileNotFound", "Locate"))
         self.clearFileButton.setText(_translate("FileNotFound", "Clear File"))
-        self.closeButton.setText(_translate("FileNotFound", "Close"))
+        self.closeButton.setText(_translate("FileNotFound", "Quit"))
