@@ -22,7 +22,6 @@ from AppParameters import Settings
 from draw_background import convert_to_qt, draw_frame
 from GenerateVideo import GenerateVideo
 from Lyrics import Lyrics, MalFormedDataException
-from uuid import uuid4
 
 processes = set([])
 
@@ -375,23 +374,21 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    @_statusBarDecorator("Browse for Source Time Spreadsheet")
    def getSourceTime(self):
-      filters = 'All Acceptable Formats (*.xlsx *.xls *.csv *.tsv);;\
-         Excel Files (*.xlsx *.xls);;\
-         CSV Files (*.csv);;\
-         TSV Files (*.tsv);;\
-         All Files (*.*)'
-      fname = QFileDialog.getOpenFileName(self, 'Select Timecode File', self.fileOpenDialogDirectory,
-         filters)
+      fname = self.settings.getSourceTime(self, self.fileOpenDialogDirectory)
+      self.processSourceTimeData(fname)
+
+   def processSourceTimeData(self, fname):
+      # print(f"fname[0] = {fname[0]}")
       if fname[0] != '':
          self.settings.source_time = fname[0]
+         # print(self.settings.source_time)
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.source_time)
          self.source_time_tb.setText(self.settings.source_time)
          self.readSourceTimeData()
-      # print(json.dumps(self.settings.__dict__()))
-      # self.statusbar.clearMessage()
 
    @_statusBarDecorator("Reading source time data")
    def readSourceTimeData(self):
+      # print(f"Reading Source time data from: {self.settings.source_time}")
          frameText = Lyrics(self.settings.source_time,
             str(self.settings.framerate))
          frameText.importData()
@@ -409,17 +406,11 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    @_statusBarDecorator("Browse for a font")
    def getParamFont(self):
-      filters = 'All Acceptable Formats (*.ttf *.otf);;\
-         All Files (*.*)'
-      file_open_dialog_directory = self.fileOpenDialogDirectory
-      if sys.platform == 'win32':
-         file_open_dialog_directory = '\\\\localhost\\c$\\windows\\fonts'
-      elif sys.platform == 'darwin':
-         file_open_dialog_directory = '~/Library/Fonts'
-      fname = QFileDialog.getOpenFileName(self, 'Select Font File', file_open_dialog_directory,
-         filters)
+      fname = self.settings.getParamFont(self, self.fileOpenDialogDirectory)
+
+   def processParamFont(self, fname):
       if fname[0] != '':
-         self.settings.font = fname[0]
+         self.settings.font = os.path.normpath(fname[0])
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.sound_track)
          self.font_tb.setText(self.settings.font)
 
@@ -446,12 +437,12 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    @_statusBarDecorator("Browse for soundtrack")
    def getSoundTrack(self):
-      filters = 'All Acceptable Formats (*.mp3 *.m4a *.wav  *.aac *.aif *.aiff);;\
-         All Files (*.*)'
-      fname = QFileDialog.getOpenFileName(self, 'Select Soundtrack File', self.fileOpenDialogDirectory,
-         filters)
+      fname = self.settings.getSoundTrack(self, self.fileOpenDialogDirectory)
+      self.processSoundTrack(fname)
+
+   def processSoundTrack(self, fname):
       if fname[0] != '':
-         self.settings.sound_track = fname[0]
+         self.settings.sound_track = os.path.normpath(fname[0])
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.sound_track)
          self.sound_track_tb.setText(self.settings.sound_track)
    
@@ -461,17 +452,18 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       fname = QFileDialog.getSaveFileName(self, 'Save As', self.fileOpenDialogDirectory,
          filters)
       if fname[0] != '':
-         self.settings.output_location = fname[0]
+         self.settings.output_location = os.path.normpath(fname[0])
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.sound_track)
          self.video_location_tb.setText(self.settings.output_location)
 
    @_statusBarDecorator("Browse for background image")
    def getBackgroundImage(self):
-      filters = 'Image files (*.jpg *.jpeg *.gif *.png)'
-      fname = QFileDialog.getOpenFileName(self, 'Select Background File', self.fileOpenDialogDirectory,
-         filters)
+      fname = self.settings.getBackgroundImage(self, self.fileOpenDialogDirectory)
+      self.processBackgroundImage(fname)
+
+   def processBackgroundImage(self, fname):
       if fname[0] != '':
-         self.settings.background_frame = fname[0]
+         self.settings.background_frame = os.path.normpath(fname[0])
          self.fileOpenDialogDirectory = os.path.dirname(self.settings.background_frame)
          self.resizeBackgroundImage()
 
