@@ -8,36 +8,40 @@ from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QSplashScreen
 
+import constants
 import error_handler
 import layouts_helper
 import layouts_wrapper
 
 qt_exception_hook = error_handler.UncaughtHook()
 
-
 class SubVid (QtWidgets.QApplication):  # Subclass QApplication
 
   # Constructor, accepting list of arguments argv[]
   def __init__(self, argv):
-    super(SubVid, self).__init__(argv)  # Call constructor of superclass
+   super(SubVid, self).__init__(argv)  # Call constructor of superclass
 
-    # Create a main window; code is handled in other file.
-    startUUID = uuid4()
-    self.license_view_dialog = layouts_wrapper.LicenseWindow()
-    self._windows: dict = {
-        startUUID: layouts_wrapper.MainDialog(app=self, uuid=startUUID)}
-   #  self._window = layouts_wrapper.ImageViewer()
-    self._windows[startUUID].show()
+   self.setOrganizationName(constants.ORGANIZATION_NAME)
+   self.setOrganizationDomain(constants.ORGANIZATION_DOMAIN)
+   self.setApplicationName(constants.APPLICATION_NAME)
 
-    # The important part!
-    # Wrapped in a try/except block since user may not have launched this program from a context menu
-    # When not launched by context menu, there is no sys.argv[1], so guard against that
-    try:
+   # Create a main window; code is handled in other file.
+   startUUID = uuid4()
+   self.license_view_dialog = layouts_wrapper.LicenseWindow()
+   self._windows: dict = {
+      startUUID: layouts_wrapper.MainDialog(app=self, uuid=startUUID)}
+   #  self._window = layouts_wrapper.ImageViewer() 
+   self._windows[startUUID].show()
+
+   # The important part!
+   # Wrapped in a try/except block since user may not have launched this program from a context menu
+   # When not launched by context menu, there is no sys.argv[1], so guard against that
+   try:
       # sys.argv[1] contains the second command line argument, aka "%1"
       filepath = sys.argv[1]
       # filepath is passed in as a string
       self._window.readPickleFile([filepath])
-    except:
+   except:
       pass
 
 

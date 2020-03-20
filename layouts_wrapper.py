@@ -1,7 +1,7 @@
 import datetime
+import functools
 import json
 import os
-import functools
 import sys
 import webbrowser
 from uuid import uuid4
@@ -11,10 +11,11 @@ import numpy
 import PyQt5.QtGui as QtGui
 import qdarkstyle
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QSettings, QThread
 from PyQt5.QtGui import QFont, QFontDatabase, QKeyEvent, QKeySequence
 from PyQt5.QtWidgets import QFileDialog, QGraphicsScene, QShortcut
 
+import constants
 import layouts.file_not_found
 import layouts.image_viewer
 import layouts.license
@@ -33,6 +34,12 @@ NEXT_KEY_ENABLED = 1
 PREVIOUS_KEY_ENABLED = 2
 ALL_KEYS_ENABLED = 3
 
+SETTINGS_THEME = 'settings/theme'
+SETTINGS_THEME_CUSTOM = 'settings/themeCustom'
+
+
+def theme_set(theme): return layouts_helper.Theme(theme, theme)
+
 class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
    previewClicked = QtCore.pyqtSignal(QtCore.QPoint)
@@ -43,7 +50,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       layouts_helper.configure_default_params(self)
       self.app = app
       self.uuid = uuid
-      self.settings: Settings = Settings()
+      self.settings: Settings = Settings(constants.ORGANIZATION_NAME, constants.APPLICATION_NAME)
+      self.appSettings = QSettings()
       self.fileOpenDialogDirectory = os.path.expanduser('~')
       self.bindLicenseActions()
       self.source_time_button.clicked.connect(self.getSourceTime)
@@ -63,7 +71,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.sound_track_tb.textChanged.connect(self.updateSoundTrackTextBox)
       self.font_tb.textChanged.connect(self.updateFontTextBox)
       self.video_location_tb.textChanged.connect(self.updateVideoLocationTextBox)
-
+      self.theme_actions = {}
+      self.themes = (list(map(theme_set, QtWidgets.QStyleFactory.keys())) +
+                [layouts_helper.Theme("Dark Style", qdarkstyle.load_stylesheet_pyqt5(), True)])
       self.videoThread: QThread = GenerateVideo()
       self.videoThread.update.connect(self.updateProgress)
       self.videoThread.text.connect(self.updateVideoGenerationStatusText)
@@ -80,7 +90,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.preview_graphic.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
 
       self.setThemeOptions()
+      self.setTheme()
       # self.actionTheme.triggered.connect(self.changeTheme)
+
 
       self.updateColors()
 
@@ -97,24 +109,35 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.fnf = FileNotFound(self)
       processes.add(self.fnf)
    
-   def changeTheme(self, func, customStyle):
+   def setTheme(self):
+      current_theme = self.appSettings.value(SETTINGS_THEME, 'Fusion', type='QStringList')
+      custom_theme = self.appSettings.value(SETTINGS_THEME_CUSTOM, False, type=bool)
+      current_theme = current_theme[0]
+      if custom_theme:
+         self.app.setStyleSheet(self.theme_actions[current_theme]['theme'].func)
+      else:
+         self.app.setStyle(QtWidgets.QApplication.setStyle(current_theme))
+         self.app.setStyleSheet("")
+      self.theme_actions[current_theme]['action'].setChecked(True)
+
+   def changeTheme(self, name, func, customStyle):
       if customStyle:
          self.app.setStyleSheet(func)
       else:
          self.app.setStyle(QtWidgets.QApplication.setStyle(func))
          self.app.setStyleSheet("")
+      self.appSettings.setValue(SETTINGS_THEME, name)
+      self.appSettings.setValue(SETTINGS_THEME_CUSTOM, customStyle)
 
    def setThemeOptions(self):
-      theme_set = lambda theme: layouts_helper.Theme(theme, theme)
-      themes = (list(map(theme_set, QtWidgets.QStyleFactory.keys())) +
-            [layouts_helper.Theme("Dark Style", qdarkstyle.load_stylesheet_pyqt5(), True)])
       group = QtWidgets.QActionGroup(self.menuTheme)
-      for theme in themes:
+      for theme in self.themes:
          action: QtWidgets.QAction = self.menuTheme.addAction(f"{theme.name}")
          action.setCheckable(True)
          action.triggered.connect(
-             functools.partial(self.changeTheme, theme.func, theme.customTheme))
+             functools.partial(self.changeTheme, theme.name, theme.func, theme.customTheme))
          group.addAction(action)
+         self.theme_actions[theme.name] = {'action': action, 'theme': theme}
       group.setExclusive(True)
 
    @_statusBarDecorator("Open Configuration File")
