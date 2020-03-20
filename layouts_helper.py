@@ -1,12 +1,20 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import layouts_wrapper
-import qdarkstyle
 
+
+class Theme():
+   def __init__(self, name, func, customTheme = False):
+      self.name = name
+      self.func = func
+      self.customTheme = customTheme
+
+   def __repr__(self):
+      return f"{self.name}"
 
 def configure_default_params(self):
    self.setupUi(self)
-   self.setStyle(QtWidgets.QApplication.setStyle("Fusion"))
+   # self.setStyle(QtWidgets.QApplication.setStyle("Fusion"))
    # self.setStyle(QtWidgets.QApplication.setStyle("WindowsVista"))
    # self.setStyle(QtWidgets.QApplication.setStyle("Windows"))
    # self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())

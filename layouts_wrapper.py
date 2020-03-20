@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import functools
 import sys
 import webbrowser
 from uuid import uuid4
@@ -8,6 +9,7 @@ from uuid import uuid4
 import cv2
 import numpy
 import PyQt5.QtGui as QtGui
+import qdarkstyle
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QThread
 from PyQt5.QtGui import QFont, QFontDatabase, QKeyEvent, QKeySequence
@@ -74,8 +76,11 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.actionSave.triggered.connect(self.saveConfig)
       self.actionNew.triggered.connect(self.newWindow)
 
-      self.background_preview.setRenderHint(QtGui.QPainter.SmoothPixmapTransform )
-      self.preview_graphic.setRenderHint(QtGui.QPainter.SmoothPixmapTransform )
+      self.background_preview.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
+      self.preview_graphic.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
+
+      self.setThemeOptions()
+      # self.actionTheme.triggered.connect(self.changeTheme)
 
       self.updateColors()
 
@@ -92,7 +97,26 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.fnf = FileNotFound(self)
       processes.add(self.fnf)
    
-   
+   def changeTheme(self, func, customStyle):
+      if customStyle:
+         self.app.setStyleSheet(func)
+      else:
+         self.app.setStyle(QtWidgets.QApplication.setStyle(func))
+         self.app.setStyleSheet("")
+
+   def setThemeOptions(self):
+      theme_set = lambda theme: layouts_helper.Theme(theme, theme)
+      themes = (list(map(theme_set, QtWidgets.QStyleFactory.keys())) +
+            [layouts_helper.Theme("Dark Style", qdarkstyle.load_stylesheet_pyqt5(), True)])
+      group = QtWidgets.QActionGroup(self.menuTheme)
+      for theme in themes:
+         action: QtWidgets.QAction = self.menuTheme.addAction(f"{theme.name}")
+         action.setCheckable(True)
+         action.triggered.connect(
+             functools.partial(self.changeTheme, theme.func, theme.customTheme))
+         group.addAction(action)
+      group.setExclusive(True)
+
    @_statusBarDecorator("Open Configuration File")
    def openConfig(self):
       filters = 'SubVid Configuration File (*.svp);;\

@@ -651,7 +651,12 @@
     <property name="title">
      <string>Options</string>
     </property>
-    <addaction name="actionTheme"/>
+    <widget class="QMenu" name="menuTheme">
+     <property name="title">
+      <string>Theme</string>
+     </property>
+    </widget>
+    <addaction name="menuTheme"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
@@ -710,16 +715,17 @@
    </property>
   </action>
   <action name="actionNew">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>New</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+N</string>
-   </property>
-  </action>
-  <action name="actionTheme">
-   <property name="text">
-    <string>Theme</string>
    </property>
   </action>
  </widget>
