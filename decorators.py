@@ -16,8 +16,8 @@ def _checkFileExists(func):
    def checkFileExists_wrapper(self):
       filesNotFoundList = self.checkFilesExist()
       if (filesNotFoundList != []):
-         self.fnf.set_data(filesNotFoundList)
-         self.fnf.show()
+         self.file_not_found.set_data(filesNotFoundList)
+         self.file_not_found.show()
       else:
          func(self)
    return checkFileExists_wrapper
