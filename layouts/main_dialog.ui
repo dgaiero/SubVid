@@ -56,8 +56,8 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="0">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
+    <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
        <layout class="QGridLayout" name="gridLayout">
@@ -216,7 +216,7 @@
                <string>Refresh frame preview window</string>
               </property>
               <property name="text">
-               <string>↻ Refresh</string>
+               <string>Refresh</string>
               </property>
               <property name="shortcut">
                <string>Ctrl+R</string>
@@ -240,6 +240,88 @@
              </widget>
             </item>
             <item>
+             <widget class="QToolButton" name="play_preview_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Play Preview (Shift+P)</string>
+              </property>
+              <property name="statusTip">
+               <string>Play Preview</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="shortcut">
+               <string>Shift+P</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="reset_preview_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Skip to Beginning (Ctrl+B)</string>
+              </property>
+              <property name="statusTip">
+               <string>Skip to Beginning</string>
+              </property>
+              <property name="text">
+               <string>↻</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+B</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="skip_to_end_button">
+              <property name="toolTip">
+               <string>Skip to End (Ctrl+Shift+E)</string>
+              </property>
+              <property name="statusTip">
+               <string>Skip to End</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+Shift+E</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="mute_preview_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Mute Preview (Ctrl+M)</string>
+              </property>
+              <property name="statusTip">
+               <string>Mute Preview</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="shortcut">
+               <string>Ctrl+M</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -259,229 +341,414 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <layout class="QFormLayout" name="formLayout">
-            <item row="0" column="0">
-             <widget class="QLabel" name="font_choice_label">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <italic>false</italic>
-                <bold>true</bold>
-                <strikeout>false</strikeout>
-                <kerning>true</kerning>
-               </font>
-              </property>
-              <property name="text">
-               <string>Font:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout10">
               <item>
-               <widget class="QLineEdit" name="font_tb">
-                <property name="enabled">
+               <layout class="QFormLayout" name="formLayout">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="font_choice_label">
+                  <property name="font">
+                   <font>
+                    <weight>75</weight>
+                    <italic>false</italic>
+                    <bold>true</bold>
+                    <strikeout>false</strikeout>
+                    <kerning>true</kerning>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Font:</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1">
+                 <layout class="QHBoxLayout" name="horizontalLayout_4">
+                  <item>
+                   <widget class="QLineEdit" name="font_tb">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="font_button">
+                    <property name="toolTip">
+                     <string>Browse for font file (Ctrl+F)</string>
+                    </property>
+                    <property name="statusTip">
+                     <string>Browse for font file</string>
+                    </property>
+                    <property name="text">
+                     <string>Browse</string>
+                    </property>
+                    <property name="shortcut">
+                     <string>Ctrl+F</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <layout class="QFormLayout" name="formLayout_2">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="font_size_label">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <italic>false</italic>
+                      <bold>true</bold>
+                      <strikeout>false</strikeout>
+                      <kerning>true</kerning>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>Font Size:</string>
+                    </property>
+                    <property name="alignment">
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="font_size_tb">
+                    <property name="minimumSize">
+                     <size>
+                      <width>70</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="statusTip">
+                     <string>Set font size</string>
+                    </property>
+                    <property name="minimum">
+                     <number>1</number>
+                    </property>
+                    <property name="maximum">
+                     <number>10000</number>
+                    </property>
+                    <property name="singleStep">
+                     <number>1</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="red_layout_2">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="red_label_2">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>R</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="red_spin_box_2">
+                    <property name="statusTip">
+                     <string>Set font red value</string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="green_layout">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="green_label">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>G</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="green_spin_box">
+                    <property name="statusTip">
+                     <string>Set font green value</string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="blue_layout">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="blue_label">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>B</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="blue_spin_box">
+                    <property name="statusTip">
+                     <string>Set font blue value</string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QGraphicsView" name="text_color_preview">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>19</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>19</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="baseSize">
+                   <size>
+                    <width>19</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="textboxColorLayout">
+                <item>
+                 <widget class="QCheckBox" name="show_bounding_box">
+                  <property name="font">
+                   <font>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                   </font>
+                  </property>
+                  <property name="statusTip">
+                   <string>Show box around text</string>
+                  </property>
+                  <property name="text">
+                   <string>Show bounding box</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="red_layout_text_box">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="red_label_text_box">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>R</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="red_spin_box_text_box">
+                    <property name="statusTip">
+                     <string>Set font red value</string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="green_layout_text_box">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="green_label_text_box">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>G</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="green_spin_box_text_box">
+                    <property name="statusTip">
+                     <string>Set font green value</string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="blue_layout_text_box">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="blue_label_text_box">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>B</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="blue_spin_box_text_box">
+                    <property name="statusTip">
+                     <string>Set font blue value</string>
+                    </property>
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <widget class="QGraphicsView" name="text_box_color_preview">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>19</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>19</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="baseSize">
+                   <size>
+                    <width>19</width>
+                    <height>19</height>
+                   </size>
+                  </property>
+                  <property name="frameShape">
+                   <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="VerticalLayout12">
+              <item>
+               <widget class="QRadioButton" name="align_text_top_radial">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="statusTip">
+                 <string>Align text to top of screen</string>
+                </property>
+                <property name="text">
+                 <string>Top</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="align_text_center_radial">
+                <property name="font">
+                 <font>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="statusTip">
+                 <string>Align text to center of screen</string>
+                </property>
+                <property name="text">
+                 <string>Center</string>
+                </property>
+                <property name="checked">
                  <bool>true</bool>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="font_button">
-                <property name="toolTip">
-                 <string>Browse for font file (Ctrl+F)</string>
-                </property>
-                <property name="statusTip">
-                 <string>Browse for font file</string>
-                </property>
-                <property name="text">
-                 <string>Browse</string>
-                </property>
-                <property name="shortcut">
-                 <string>Ctrl+F</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <layout class="QFormLayout" name="formLayout_2">
-              <item row="0" column="0">
-               <widget class="QLabel" name="font_size_label">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <italic>false</italic>
-                  <bold>true</bold>
-                  <strikeout>false</strikeout>
-                  <kerning>true</kerning>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Font Size:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QSpinBox" name="font_size_tb">
-                <property name="minimumSize">
-                 <size>
-                  <width>70</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="statusTip">
-                 <string>Set font size</string>
-                </property>
-                <property name="minimum">
-                 <number>1</number>
-                </property>
-                <property name="maximum">
-                 <number>10000</number>
-                </property>
-                <property name="singleStep">
-                 <number>1</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QFormLayout" name="red_layout_2">
-              <item row="0" column="0">
-               <widget class="QLabel" name="red_label_2">
+               <widget class="QRadioButton" name="align_text_bottom_radial">
                 <property name="font">
                  <font>
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
                 </property>
-                <property name="text">
-                 <string>R</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QSpinBox" name="red_spin_box_2">
                 <property name="statusTip">
-                 <string>Set font red value</string>
+                 <string>Align text to bottom of screen</string>
                 </property>
-                <property name="maximum">
-                 <number>255</number>
+                <property name="text">
+                 <string>Bottom</string>
                 </property>
                </widget>
               </item>
              </layout>
-            </item>
-            <item>
-             <layout class="QFormLayout" name="green_layout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="green_label">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>G</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QSpinBox" name="green_spin_box">
-                <property name="statusTip">
-                 <string>Set font green value</string>
-                </property>
-                <property name="maximum">
-                 <number>255</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QFormLayout" name="blue_layout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="blue_label">
-                <property name="font">
-                 <font>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>B</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QSpinBox" name="blue_spin_box">
-                <property name="statusTip">
-                 <string>Set font blue value</string>
-                </property>
-                <property name="maximum">
-                 <number>255</number>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
-             <widget class="QGraphicsView" name="color_preview">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>19</width>
-                <height>19</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>19</width>
-                <height>19</height>
-               </size>
-              </property>
-              <property name="baseSize">
-               <size>
-                <width>19</width>
-                <height>19</height>
-               </size>
-              </property>
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Plain</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </item>
@@ -635,11 +902,19 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="actionOpenRecent">
+     <property name="title">
+      <string>Open Recent</string>
+     </property>
+    </widget>
     <addaction name="actionNew"/>
     <addaction name="separator"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpenRecent"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -656,7 +931,9 @@
       <string>Theme</string>
      </property>
     </widget>
+    <addaction name="actionConfigure_FFMPEG_location"/>
     <addaction name="menuTheme"/>
+    <addaction name="actionClear_all_settings"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
@@ -673,7 +950,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset theme="open">
-     <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+     <normaloff>../../../../../../.designer/backup</normaloff>../../../../../../.designer/backup</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -728,6 +1005,32 @@
     <string>Ctrl+Shift+N</string>
    </property>
   </action>
+  <action name="actionConfigure_FFMPEG_location">
+   <property name="text">
+    <string>Congiure FFMPEG location</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actiontest">
+   <property name="text">
+    <string>test</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Q</string>
+   </property>
+  </action>
+  <action name="actionClear_all_settings">
+   <property name="text">
+    <string>Clear all settings</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>source_time_tb</tabstop>
@@ -741,7 +1044,7 @@
   <tabstop>red_spin_box_2</tabstop>
   <tabstop>green_spin_box</tabstop>
   <tabstop>blue_spin_box</tabstop>
-  <tabstop>color_preview</tabstop>
+  <tabstop>text_color_preview</tabstop>
   <tabstop>background_preview</tabstop>
   <tabstop>frame_previous_button</tabstop>
   <tabstop>refresh_button</tabstop>
