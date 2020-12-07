@@ -52,6 +52,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.uuid = uuid
       self.settings: Settings = Settings(constants.ORGANIZATION_NAME, constants.APPLICATION_NAME)
       self.appSettings = QSettings()
+        self.ffmpeg_config = FfmpegConfig()
+        processes.add(self.ffmpeg_config)
       self.fileOpenDialogDirectory = os.path.expanduser('~')
       self.bindLicenseActions()
       self.source_time_button.clicked.connect(self.getSourceTime)
@@ -109,6 +111,20 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.fnf = FileNotFound(self)
       processes.add(self.fnf)
    
+    def checkFFMPEGVersion(self):
+        version = self.ffmpeg_config.verifyFFMPEG(self.appSettings.value(
+            constants.FFMPEG_LOCATION, 'ffmpeg', type='QStringList')[0])
+        if not(version):
+            self.ffmpeg_config.setWindowFlag(
+                QtCore.Qt.WindowCloseButtonHint, False)
+            self.ffmpeg_config.cancel_button.setEnabled(False)
+            self.ffmpeg_config.show()
+            # self.ffmpeg_config.setWindowFlag(
+            #   QtCore.Qt.WindowCloseButtonHint, True)
+
+    def showFFMPEGConfigureDialog(self):
+        self.ffmpeg_config.appSettings = self.appSettings
+        self.ffmpeg_config.show()
    def setTheme(self):
       current_theme = self.appSettings.value(SETTINGS_THEME, 'Fusion', type='QStringList')
       custom_theme = self.appSettings.value(SETTINGS_THEME_CUSTOM, False, type=bool)
@@ -699,4 +715,82 @@ class FileNotFound(QtWidgets.QMainWindow, layouts.file_not_found.Ui_FileNotFound
          inx = data.index(row)
          self.file_locator_view.insertRow(inx)
          for i in range(len(row)):
-            self.file_locator_view.setItem(inx,i,QtWidgets.QTableWidgetItem(str(row[i])))
+
+
+class FfmpegConfig(QtWidgets.QDialog, layouts.search_ffmpeg_executable.Ui_FfmpegExecDialog):
+    def __init__(self, parent=None):
+        super(FfmpegConfig, self).__init__(parent)
+        layouts_helper.configure_default_params(self)
+        self.setWindowFlags(QtCore.Qt.WindowSystemMenuHint |
+                            QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
+        # self.MainWindow: MainDialog = parent
+
+        self.verify = False
+        self.save_button.setEnabled(self.verify)
+        self.ffmpeg_version = '0.0.0'
+        self.appSettings = QSettings()
+        self.openLocation = ''
+        self.ffmpeg_location = self.appSettings.value(
+            constants.FFMPEG_LOCATION, 'ffmpeg', type='QStringList')[0]
+
+        self.ffmpeg_exec_button.clicked.connect(self.getNewFFMPEG)
+        self.ffmpeg_exec_tb.setText(self.ffmpeg_location)
+        self.ffmpeg_exec_tb.textChanged.connect(
+            functools.partial(self.save_button.setEnabled, False))
+        self.cancel_button.clicked.connect(self.close)
+        self.save_button.clicked.connect(self.saveSettings)
+        self.verify_button.clicked.connect(self.checkFFMPEGVersion)
+        self.checkFFMPEGVersion()
+        if self.verify == False:
+            self.show()
+
+    def closeEvent(self, event):
+        self.cancel_button.setEnabled(True)
+        self.setWindowFlag(
+            QtCore.Qt.WindowCloseButtonHint, True)
+        QtWidgets.QDialog.closeEvent(self, event)
+
+    def saveSettings(self):
+        if self.verify == True:
+            self.appSettings.setValue(
+                constants.FFMPEG_LOCATION, self.ffmpeg_location)
+        self.close()
+
+    def getNewFFMPEG(self):
+        ffmpeg_location = self.getExecutable(self, self.openLocation)[0]
+        if ffmpeg_location == '':
+            return
+        self.ffmpeg_exec_tb.setText(ffmpeg_location)
+        self.checkFFMPEGVersion()
+
+    def checkFFMPEGVersion(self):
+        version_number = None
+        if self.ffmpeg_exec_tb.text() != '':
+            version_number = self.verifyFFMPEG(self.ffmpeg_exec_tb.text())
+        if version_number is None:
+            self.ffmpeg_version_label.setText("Invalid FFMPEG Version")
+        else:
+            self.ffmpeg_location = self.ffmpeg_exec_tb.text()
+            self.ffmpeg_version_label.setText(
+                f"Found FFMPEG version {version_number}")
+            self.verify = True
+            self.save_button.setEnabled(self.verify)
+
+    def verifyFFMPEG(self, ffmpeg_location):
+        try:
+            spc = subprocess.check_output([ffmpeg_location, '-version'])
+        except subprocess.CalledProcessError:
+            return None
+        except FileNotFoundError:
+            return None
+        version = re.findall(r"ffmpeg version\s(.+)\sCopyright",
+                             spc.decode(sys.stdout.encoding))
+        if version:
+            return version[0].strip()
+        return None
+
+    def getExecutable(self, parent, openLocation):
+        filters = 'All Executable Files (*.exe)'
+        fname = QFileDialog.getOpenFileName(parent, 'Select FFMPEG Executable File', openLocation,
+                                            filters)
+        return fname

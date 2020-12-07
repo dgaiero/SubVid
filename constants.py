@@ -1,3 +1,5 @@
 ORGANIZATION_NAME = "Firelight"
 ORGANIZATION_DOMAIN = "FLd"
 APPLICATION_NAME = "SubVid"
+
+FFMPEG_LOCATION = 'settings/ffmpegLocation'
