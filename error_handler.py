@@ -14,11 +14,11 @@ def show_exception_box(log_msg):
     If unavailable (non-console application), log an additional notice.
     """
     if QtWidgets.QApplication.instance() is not None:
-            errorbox: QtWidgets.QMessageBox = QtWidgets.QMessageBox()
-            errorbox.setIcon(QtWidgets.QMessageBox.Warning)
-            errorbox.setText(
-                "Oops. An unexpected error occured:\n{0}".format(log_msg))
-            errorbox.exec_()
+        errorbox: QtWidgets.QMessageBox = QtWidgets.QMessageBox()
+        errorbox.setIcon(QtWidgets.QMessageBox.Warning)
+        errorbox.setText(
+            "Oops. An unexpected error occured:\n{0}".format(log_msg))
+        errorbox.exec_()
     else:
         log.debug("No QApplication instance available.")
 
