@@ -88,8 +88,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
       self.actionSave.triggered.connect(self.saveConfig)
       self.actionNew.triggered.connect(self.newWindow)
 
-      self.background_preview.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
-      self.preview_graphic.setRenderHint(QtGui.QPainter.SmoothPixmapTransform)
+        self.recently_opened = RecentlyOpened(self)
+        self.recently_opened.buildRecentlyOpenedDict()
+        self.recently_opened.build_dropdown()
 
       self.setThemeOptions()
       self.setTheme()
@@ -164,9 +165,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
          self.fileOpenDialogDirectory, filters)
       if fname[0] == '' or fname is None:
          return
-      self.readConfigFile(fname)
-      
-   def readConfigFile(self, fname):
+        self.recently_opened.admitNewItem(os.path.normpath(fname[0]))
       with open(fname[0], 'r') as handle:
          settings = json.load(handle)
       self.settings.saveFile = fname[0]
