@@ -45,6 +45,12 @@ class SubVid (QtWidgets.QApplication):  # Subclass QApplication
         except:
             pass
 
+    def newWindow(self):
+        uuid = uuid4()
+        self._windows[uuid] = layouts_wrapper.MainDialog(
+            app=self, uuid=uuid)
+        self._windows[uuid].show()
+
 
 def resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):

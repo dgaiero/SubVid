@@ -384,11 +384,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
         return currentData == saveData
 
     def newWindow(self):
-        #TODO: Put in parent
-        uuid = uuid4()
-        self.app._windows[uuid] = MainDialog(
-            app=self.app, uuid=uuid)
-        self.app._windows[uuid].show()
+        self.app.newWindow()
 
     @_checkFileExists
     def refreshVideo(self):
