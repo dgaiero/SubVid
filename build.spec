@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['SubVid.py'],
-             pathex=['C:\\Users\\dgaiero\\OneDrive - California Polytechnic State University\\Documents\\projects\\SubVid'],
+             pathex=['C:\\Users\\dpgai\\Documents\\projects\\SubVid'],
              binaries=[],
              datas=[('LICENSE.LGPL', '.'), ('COPYING.LESSER', '.')],
              hiddenimports=[],

@@ -12,6 +12,7 @@ class Line():
         self.delta: Timecode = self.end - self.start
         self.num_frames = self.delta.frames
         self.line = line.split(r"\n")
+        self.line = line.split(r"\N")
 
 
 class Lyrics():

@@ -23,8 +23,9 @@ def draw_frame(appData: Settings, text: list):
             if ctext == '':
                 continue
             w, ht = draw.textsize(ctext, font)
-            x_cord = ((W-w)/2)
-            y_cord = ((H-ht*len(text))/2+(idx*ht))+offset_factor*((H-h*len(text))/2)
+            x_cord = ((W-w)/2)+appData.text_offset[0]
+            y_cord = (((H-ht*len(text))/2+(idx*ht))+offset_factor *
+                      ((H-h*len(text))/2))-appData.text_offset[1]
             draw.rectangle(((x_cord-(h/6), y_cord),
                             (x_cord+w+(h/6), y_cord+h+(h/6))), fill=tuple(
                 appData.background_color))
@@ -33,8 +34,9 @@ def draw_frame(appData: Settings, text: list):
     for i in range(len(text)):
         ctext = text[i]
         w, _ = draw.textsize(ctext, font)
-        x_cord = ((W-w)/2)
-        y_cord = ((H-h*len(text))/2+(i*h))+offset_factor*((H-h*len(text))/2)
+        x_cord = ((W-w)/2)+appData.text_offset[0]
+        y_cord = (((H-h*len(text))/2+(i*h))+offset_factor *
+                  ((H-h*len(text))/2))-appData.text_offset[1]
         draw.text((x_cord, y_cord), ctext, tuple(
             appData.text_color), font=font)
     return img

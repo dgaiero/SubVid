@@ -16,7 +16,8 @@ class Settings():
                  text_color=[0, 0, 0],
                  background_color=[0, 0, 0],
                  show_background_frame=False,
-                 text_position='center'):
+                 text_position='center',
+                 text_offset=[0,0]):
         self.source_time = source_time
         self.sound_track = sound_track
         self.font = font
@@ -28,6 +29,8 @@ class Settings():
         self.background_color = background_color
         self.show_background_frame = show_background_frame
         self.text_position = text_position
+        self.text_offset = text_offset
+
         self.frameNumber = 0
         self.frameTextList = []
         self.framerate = 30
@@ -45,7 +48,8 @@ class Settings():
             'text_color': self.text_color,
             'background_color': self.background_color,
             'show_background_frame': self.show_background_frame,
-            'text_position': self.text_position
+            'text_position': self.text_position,
+            'text_offset': self.text_offset,
         }
         return r_dict
 
@@ -75,7 +79,8 @@ class Settings():
                        text_color=[0, 0, 0],
                        background_color=[0, 0, 0],
                        show_background_frame=False,
-                       text_position='center'):
+                       text_position='center',
+                       text_offset=[0,0]):
         self.source_time = source_time
         self.sound_track = sound_track
         self.font = font
@@ -86,6 +91,7 @@ class Settings():
         self.background_color = background_color
         self.show_background_frame = show_background_frame
         self.text_position = text_position
+        self.text_offset = text_offset
 
     def canPreview(self):
         if self.videoInProgress:

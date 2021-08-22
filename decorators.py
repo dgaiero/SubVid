@@ -21,3 +21,10 @@ def _checkFileExists(func):
       else:
          func(self)
    return checkFileExists_wrapper
+
+def _refreshPreview(func):
+   @functools.wraps(func)
+   def refreshPreview_wrapper(self):
+      func(self)
+      self.setPreviewPicture()
+   return refreshPreview_wrapper

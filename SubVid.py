@@ -41,7 +41,7 @@ class SubVid (QtWidgets.QApplication):  # Subclass QApplication
             # sys.argv[1] contains the second command line argument, aka "%1"
             filepath = sys.argv[1]
             # filepath is passed in as a string
-            self._window.readPickleFile([filepath])
+            self._windows[startUUID].readConfigFile(filepath)
         except:
             pass
 

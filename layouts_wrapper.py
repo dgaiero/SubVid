@@ -29,7 +29,7 @@ import layouts.main_dialog
 import layouts.search_ffmpeg_executable
 import layouts_helper
 from AppParameters import Settings
-from decorators import _checkFileExists, _statusBarDecorator
+from decorators import _checkFileExists, _statusBarDecorator, _refreshPreview
 from draw_background import convert_to_qt, draw_frame
 from GenerateVideo import GenerateVideo
 from Lyrics import Lyrics, MalFormedDataException
@@ -147,6 +147,13 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
         self.actionClear_all_settings.triggered.connect(self.appSettings.clear)
 
+        self.text_align_left.setDisabled(True)
+        self.text_align_center.setDisabled(True)
+        self.text_align_right.setDisabled(True)
+
+        self.text_x_pos.valueChanged.connect(self.update_text_x_pos)
+        self.text_y_pos.valueChanged.connect(self.update_text_y_pos)
+
         self.currentFrame = 0
 
         self.actionConfigure_FFMPEG_location.triggered.connect(
@@ -163,6 +170,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
         self.previewClicked.connect(self.bindLargePreviewActions)
 
         self.checkFramePosition()
+        self.preview_frame_buffer = list()
 
         timer100ms = QtCore.QTimer(self)
         timer100ms.timeout.connect(self.runUpdateEvents100ms)
@@ -270,6 +278,9 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
         self.red_spin_box_text_box.setValue(self.settings.background_color[0])
         self.green_spin_box_text_box.setValue(self.settings.background_color[1])
         self.blue_spin_box_text_box.setValue(self.settings.background_color[2])
+
+        self.text_x_pos.setValue(self.settings.text_offset[0])
+        self.text_y_pos.setValue(self.settings.text_offset[1])
         self.text_box_color_preview.setStyleSheet(
             f"background-color: rgb({self.settings.background_color[0]}, \
                 {self.settings.background_color[1]}, \
@@ -405,6 +416,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
         self.settings.output_location = os.path.normpath(
             self.video_location_tb.text())
     
+    @_refreshPreview
     def toggleBoundingBox(self):
         if self.show_bounding_box.isChecked():
             self.settings.show_background_frame = True
@@ -436,11 +448,25 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             self.play_preview_button.setStatusTip(
                 QCoreApplication.translate("MainWindow", "Play Preview"))
             self.checkFramePosition()
-            pass
+            self.video_generation_progress.setValue(0)
         else:
             self.isPlayingPreview = True
             self.checkFramePosition()
+            self.video_generation_progress.setValue(self.settings.frameNumber)
             start_frame = self.settings.frameTextList[self.settings.frameNumber]
+
+            self.play_preview_button.setDisabled(True)
+            for idx, _ in enumerate(self.settings.frameTextList):
+                if idx < self.settings.frameNumber:
+                    continue
+                self.updateProgress()
+                pilImg = draw_frame(
+                    self.settings, self.settings.frameTextList[idx].line)
+                self.preview_frame_buffer[idx] = convert_to_qt(pilImg)
+            self.video_generation_progress.setValue(0)
+            self.video_generation_progress.setValue(self.settings.frameNumber)
+            self.play_preview_button.setDisabled(False)
+
             num_seconds = (start_frame.start.frames)*1.0/(self.settings.framerate)
             song_uri = QUrl.fromLocalFile(self.settings.sound_track)
             content = QMediaContent(song_uri)
@@ -465,7 +491,10 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
                 self.style().standardIcon(QStyle.SP_MediaPlay))
             self.checkFramePosition()
             return
-        self.setPreviewPicture()
+        # self.setPreviewPicture()
+        self.updateProgress()
+        self.settings.preview_frame = self.preview_frame_buffer[self.settings.frameNumber]
+        self.resizePreview()
         current_frame = self.settings.frameTextList[self.settings.frameNumber]
         num_seconds = (current_frame.num_frames)*1.0/(self.settings.framerate)
         self.timer_next_frame = QtCore.QTimer(self)
@@ -515,6 +544,8 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             enabled |= NEXT_KEY_ENABLED
         return enabled
 
+
+    @_refreshPreview
     def setTextPosition(self):
         radio_button = self.sender()
         if radio_button.isChecked():
@@ -631,6 +662,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             self.settings.frameTextList = frameText.timecode_frames
             self.video_generation_progress.setMaximum(
                 len(self.settings.frameTextList) + 1)
+            self.preview_frame_buffer = [None]*len(self.settings.frameTextList)
         except ValueError as e:
             layouts_helper.show_dialog_non_informative_text(
                 self, "Error", f"<b>Value Error:</b> {str(e)}", "", buttons=QtWidgets.QMessageBox.Ok)
@@ -638,6 +670,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
             extended_text = f"{e.message}\nActual Headers: {', '.join(e.actual_headers)}"
             layouts_helper.show_dialog_detailed_text(
                 self, "Error", f"Error: {e.message}", "Informative Text", extended_text)
+        
 
     @_statusBarDecorator("Browse for a font")
     def getParamFont(self):
@@ -651,29 +684,44 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
                 self.settings.sound_track)
             self.font_tb.setText(self.settings.font)
 
+    @_refreshPreview
     def setFontSize(self):
         self.settings.font_size = self.font_size_tb.value()
 
+    @_refreshPreview
+    def update_text_x_pos(self):
+        self.settings.text_offset[0] = self.text_x_pos.value()
+
+    @_refreshPreview
+    def update_text_y_pos(self):
+        self.settings.text_offset[1] = self.text_y_pos.value()
+
+    @_refreshPreview
     def changeFontPickerRed(self):
         self.settings.text_color[0] = self.red_spin_box_2.value()
         self.updateColors()
 
+    @_refreshPreview
     def changeFontPickerGreen(self):
         self.settings.text_color[1] = self.green_spin_box.value()
         self.updateColors()
 
+    @_refreshPreview
     def changeFontPickerBlue(self):
         self.settings.text_color[2] = self.blue_spin_box.value()
         self.updateColors()
 
+    @_refreshPreview
     def changeBackgroundPickerRed(self):
         self.settings.background_color[0] = self.red_spin_box_text_box.value()
         self.updateColors()
 
+    @_refreshPreview
     def changeBackgroundPickerGreen(self):
         self.settings.background_color[1] = self.green_spin_box_text_box.value()
         self.updateColors()
 
+    @_refreshPreview
     def changeBackgroundPickerBlue(self):
         self.settings.background_color[2] = self.blue_spin_box_text_box.value()
         self.updateColors()

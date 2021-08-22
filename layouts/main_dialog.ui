@@ -276,7 +276,7 @@
                <string>Skip to Beginning</string>
               </property>
               <property name="text">
-               <string>↻</string>
+               <string>...</string>
               </property>
               <property name="shortcut">
                <string>Ctrl+B</string>
@@ -428,6 +428,9 @@
                     <property name="statusTip">
                      <string>Set font size</string>
                     </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
                     <property name="minimum">
                      <number>1</number>
                     </property>
@@ -461,6 +464,9 @@
                     <property name="statusTip">
                      <string>Set font red value</string>
                     </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
                     <property name="maximum">
                      <number>255</number>
                     </property>
@@ -488,6 +494,9 @@
                     <property name="statusTip">
                      <string>Set font green value</string>
                     </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
                     <property name="maximum">
                      <number>255</number>
                     </property>
@@ -514,6 +523,9 @@
                    <widget class="QSpinBox" name="blue_spin_box">
                     <property name="statusTip">
                      <string>Set font blue value</string>
+                    </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
                     </property>
                     <property name="maximum">
                      <number>255</number>
@@ -596,6 +608,9 @@
                     <property name="statusTip">
                      <string>Set font red value</string>
                     </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
                     <property name="maximum">
                      <number>255</number>
                     </property>
@@ -623,6 +638,9 @@
                     <property name="statusTip">
                      <string>Set font green value</string>
                     </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
                     <property name="maximum">
                      <number>255</number>
                     </property>
@@ -649,6 +667,9 @@
                    <widget class="QSpinBox" name="blue_spin_box_text_box">
                     <property name="statusTip">
                      <string>Set font blue value</string>
+                    </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
                     </property>
                     <property name="maximum">
                      <number>255</number>
@@ -690,6 +711,158 @@
                    <enum>QFrame::Plain</enum>
                   </property>
                  </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="textboxColorLayout2">
+                <item>
+                 <widget class="QToolButton" name="text_align_left">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="toolTip">
+                   <string>Align Text Left (Ctrl+L)</string>
+                  </property>
+                  <property name="statusTip">
+                   <string>Align Text Left</string>
+                  </property>
+                  <property name="text">
+                   <string>L</string>
+                  </property>
+                  <property name="shortcut">
+                   <string>Ctrl+L</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="text_align_center">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="toolTip">
+                   <string>Align Text Center (Ctrl+E)</string>
+                  </property>
+                  <property name="statusTip">
+                   <string>Align Text Center</string>
+                  </property>
+                  <property name="text">
+                   <string>C</string>
+                  </property>
+                  <property name="shortcut">
+                   <string>Ctrl+E</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="text_align_right">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="toolTip">
+                   <string>Align Text Right (Ctrl+Shift+R)</string>
+                  </property>
+                  <property name="statusTip">
+                   <string>Align Text Right</string>
+                  </property>
+                  <property name="text">
+                   <string>R</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="red_layout_text_box2">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="red_label_text_box2">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>x offset</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="text_x_pos">
+                    <property name="statusTip">
+                     <string>Set X position of text</string>
+                    </property>
+                    <property name="inputMethodHints">
+                     <set>Qt::ImhNone</set>
+                    </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-10000</number>
+                    </property>
+                    <property name="maximum">
+                     <number>10000</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QFormLayout" name="green_layout_text_box2">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="green_label_text_box2">
+                    <property name="font">
+                     <font>
+                      <weight>75</weight>
+                      <bold>true</bold>
+                     </font>
+                    </property>
+                    <property name="text">
+                     <string>y offset</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSpinBox" name="text_y_pos">
+                    <property name="statusTip">
+                     <string>Set Y position of text</string>
+                    </property>
+                    <property name="inputMethodHints">
+                     <set>Qt::ImhNone</set>
+                    </property>
+                    <property name="buttonSymbols">
+                     <enum>QAbstractSpinBox::NoButtons</enum>
+                    </property>
+                    <property name="minimum">
+                     <number>-10000</number>
+                    </property>
+                    <property name="maximum">
+                     <number>10000</number>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </item>
