@@ -33,6 +33,7 @@ from decorators import _checkFileExists, _statusBarDecorator, _refreshPreview
 from draw_background import convert_to_qt, draw_frame
 from GenerateVideo import GenerateVideo
 from Lyrics import Lyrics, MalFormedDataException
+from version import Version
 
 processes = set([])
 
@@ -812,10 +813,12 @@ class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
         layouts_helper.configure_default_params(self)
         self.setWindowFlags(QtCore.Qt.WindowSystemMenuHint |
                             QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
+        self.version = Version()
+        self.version.read_file()
         self.viewLicenseOnlineButton.clicked.connect(self.viewLicense)
         self.viewAddendumOnlineButton.clicked.connect(self.viewAddendum)
-        license_text = open('LICENSE.LGPL').read()
-        addendum_text = open('COPYING.LESSER').read()
+        license_text = open(layouts_helper.resource_path('LICENSE.LGPL')).read()
+        addendum_text = open(layouts_helper.resource_path('COPYING.LESSER')).read()
         self.license_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/LICENSE.LGPL'
         self.addendum_url = 'https://raw.githubusercontent.com/dgaiero/SubVid/master/COPYING.LESSER'
         self.licenseText.setPlainText(license_text)
@@ -825,6 +828,10 @@ class LicenseWindow(QtWidgets.QDialog, layouts.license.Ui_Dialog):
         _font = QFont(_fontstr, 8)
         self.licenseText.setFont(_font)
         self.addendumText.setFont(_font)
+        self.versionText.setText(f'Version: {self.version}')
+        _translate = QtCore.QCoreApplication.translate
+        self.label.setText(_translate("Dialog", f"<html><head/><body><h1 style=\" margin-top:18px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:xx-large; font-weight:600;\">Copyright &copy; Dominic Gaiero {datetime.datetime.now().year}</span></h1><p>Developed and Designed by Dominic Gaiero This program is licensed under the GNU General Public License v3.0. This license is shown below and is generated from the online version. For an online version, click the button below.</p></body></html>"))
+
 
     def viewLicense(self):
         title = "View License"

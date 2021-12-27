@@ -31,7 +31,8 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-!build.spec
+build.spec
+SubVid.spec
 
 # Installer logs
 pip-log.txt
@@ -128,7 +129,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vscode/*
-installer/SubVid-cache/cacheIndex.txt
-installer/SubVid-cache/
-instaler/ExeBuildSetupFiles/
-installer/Setup Files/
+install_script_tmp.iss
+file_version_info.txt

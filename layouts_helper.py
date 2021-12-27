@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 import layouts_wrapper
+import os
 
 
 class Theme():
@@ -20,6 +21,10 @@ def configure_default_params(self):
     # self.setStyle(QtWidgets.QApplication.setStyle("Windows"))
     # self.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
 
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath('.'), relative_path)
 
 def show_dialog_detailed_text(parent, window_title, message, informative_text, extended_text, buttons=QtWidgets.QMessageBox.Ok |
                               QtWidgets.QMessageBox.Cancel, icon=QtWidgets.QMessageBox.Critical):

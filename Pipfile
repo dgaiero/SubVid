@@ -7,6 +7,8 @@ verify_ssl = true
 autopep8 = "*"
 pylint = "*"
 pyqt5designer = "*"
+python-dotenv = "*"
+tinyaes = "*"
 
 [packages]
 pyqt5 = "*"
@@ -22,4 +24,4 @@ qdarkstyle = "*"
 pyinstaller = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "*"
