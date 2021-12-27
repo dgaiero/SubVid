@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from binaryornot.check import is_binary
 from tablib import Dataset
@@ -11,8 +12,10 @@ class Line():
         self.end = Timecode(fps, end)
         self.delta: Timecode = self.end - self.start
         self.num_frames = self.delta.frames
-        self.line = line.split(r"\n")
-        self.line = line.split(r"\N")
+        if line == '':
+            self.line = [line]
+        else:
+            self.line = re.split(r'\\n|\\N', line)
 
 
 class Lyrics():
