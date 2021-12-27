@@ -159,7 +159,7 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
 
         self.actionConfigure_FFMPEG_location.triggered.connect(
             self.showFFMPEGConfigureDialog)
-        self.checkFFMPEGVersion()
+        self.checkFFMPEGVersion(onStart=True)
         self.setThemeOptions()
         self.setTheme()
         # self.actionTheme.triggered.connect(self.changeTheme)
@@ -180,16 +180,11 @@ class MainDialog(QtWidgets.QMainWindow, layouts.main_dialog.Ui_MainWindow):
         self.file_not_found = FileNotFound(self)
         processes.add(self.file_not_found)
 
-    def checkFFMPEGVersion(self):
+    def checkFFMPEGVersion(self, onStart=False):
         version = self.ffmpeg_config.verifyFFMPEG(self.appSettings.value(
             constants.FFMPEG_LOCATION, 'ffmpeg', type='QStringList')[0])
         if not(version):
-            self.ffmpeg_config.setWindowFlag(
-                QtCore.Qt.WindowCloseButtonHint, False)
-            self.ffmpeg_config.cancel_button.setEnabled(False)
             self.ffmpeg_config.show()
-            # self.ffmpeg_config.setWindowFlag(
-            #   QtCore.Qt.WindowCloseButtonHint, True)
 
     def showFFMPEGConfigureDialog(self):
         self.ffmpeg_config.appSettings = self.appSettings
@@ -1022,9 +1017,9 @@ class FfmpegConfig(QtWidgets.QDialog, layouts.search_ffmpeg_executable.Ui_Ffmpeg
         self.setWindowFlags(QtCore.Qt.WindowSystemMenuHint |
                             QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         # self.MainWindow: MainDialog = parent
-
+        self.ffmpeg_found = False
         self.verify = False
-        self.save_button.setEnabled(self.verify)
+        self.save_button.setEnabled(self.ffmpeg_found)
         self.ffmpeg_version = '0.0.0'
         self.appSettings = QSettings()
         self.openLocation = ''
@@ -1039,17 +1034,20 @@ class FfmpegConfig(QtWidgets.QDialog, layouts.search_ffmpeg_executable.Ui_Ffmpeg
         self.save_button.clicked.connect(self.saveSettings)
         self.verify_button.clicked.connect(self.checkFFMPEGVersion)
         self.checkFFMPEGVersion()
-        if self.verify == False:
+        if self.ffmpeg_found == False:
             self.show()
 
     def closeEvent(self, event):
-        self.cancel_button.setEnabled(True)
-        self.setWindowFlag(
-            QtCore.Qt.WindowCloseButtonHint, True)
-        QtWidgets.QDialog.closeEvent(self, event)
+        if not(self.ffmpeg_found):
+            sys.exit()
+        else:
+            self.cancel_button.setEnabled(True)
+            self.setWindowFlag(
+                QtCore.Qt.WindowCloseButtonHint, True)
+            QtWidgets.QDialog.closeEvent(self, event)
 
     def saveSettings(self):
-        if self.verify == True:
+        if self.ffmpeg_found == True:
             self.appSettings.setValue(
                 constants.FFMPEG_LOCATION, self.ffmpeg_location)
         self.close()
@@ -1071,10 +1069,14 @@ class FfmpegConfig(QtWidgets.QDialog, layouts.search_ffmpeg_executable.Ui_Ffmpeg
             self.ffmpeg_location = self.ffmpeg_exec_tb.text()
             self.ffmpeg_version_label.setText(
                 f"Found FFMPEG version {version_number}")
-            self.verify = True
-            self.save_button.setEnabled(self.verify)
+            self.ffmpeg_found = True
+            self.save_button.setEnabled(self.ffmpeg_found)
 
     def verifyFFMPEG(self, ffmpeg_location):
+        if not(self.ffmpeg_found):
+            self.cancel_button.setText('Exit')
+            self.cancel_button.clicked.connect(sys.exit)
+            self.cancel_button.setEnabled(True)
         try:
             spc = subprocess.check_output([ffmpeg_location, '-version'])
         except subprocess.CalledProcessError:
